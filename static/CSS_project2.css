@@ -1,0 +1,51 @@
+/* Coolors Exported Palette - coolors.co/3d348b-7678ed-f7b801-f18701-f35b04 */
+/* HSL */
+header, footer {
+  padding: 15px 15px 50px 15px;
+  color: darkgrey;
+  background-color: #368ef2;
+}
+
+footer {
+  height: 6vh;
+}
+
+header {
+  font-size: 1.5em;
+  height: 3vh;
+}
+
+input[type=email], input[type=password], input[type=text] {
+  margin-bottom: 5px;
+}
+
+#loginwindow {
+  padding: 10px 15px 5px;
+  background-color: #368ef2;
+}
+
+#searchwindow {
+  padding: 15px 15px 15px 15px;
+  background-color: #368ef2;
+}
+
+#locwindow {
+  padding: 15px 15px 15px 15px;
+  background-color: #5546a0;
+}
+
+#weatherwindow {
+  padding: 15px 15px 15px 15px;
+  background-color: #358d3b;
+}
+
+a:hover {
+  color: orange;
+  text-decoration: none;
+}
+
+p {
+  text-align: justify;
+}
+
+/*# sourceMappingURL=CSS_project2.css.map */

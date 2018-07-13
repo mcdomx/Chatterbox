@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Chatterbox
+{% endblock %}
+
+
+{% if user_id is defined %}
+
+{% else %}
+  user_id="enter email" >
+{% endif %}
+
+{% if pwd is defined %}
+  id_pwd=pwd
+{% else %}
+  id_pwd="enter password"
+{% endif %}
+
+
+{% block body %}
+      <!-- CONTAINER BODY_TEXT -->
+      {% if message is defined() %}
+        <p></p>
+        <div class="alert alert-warning col-6 mx-auto" role="alert">
+          {{ message }}
+        </div>
+      {% endif %}
+
+      {% if session["user_session"] is defined() %}
+      {% else %}
+
+        <div class="container col-4" id="main_window">
+
+        </div> <!-- end container -->
+
+      {% endif %}
+
+
+
+      <!-- end CONTAINER BODY_TEXT -->
+{% endblock %}

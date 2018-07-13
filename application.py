@@ -1,6 +1,8 @@
 import os
+import datetime
+import requests, json
 
-from flask import Flask, session
+from flask import Flask, session, jsonify, render_template, request
 from flask_session import Session
 from flask_socketio import SocketIO, emit
 
@@ -16,6 +18,7 @@ if not os.getenv("FLASK_APP"):
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 socketio = SocketIO(app)
@@ -26,4 +29,4 @@ channel_list = ['general']
 
 @app.route("/")
 def index():
-    return "Project 2: TODO"
+    return render_template("index.html", message="No message")
