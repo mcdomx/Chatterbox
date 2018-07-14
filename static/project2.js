@@ -18,7 +18,10 @@ post2 = {"date": 1531517847, "by": "Jerry", "post": "Wow!  Great work."};
 post3 = {"date": 1531517947, "by": "Mark", "post": "Thanks, I can't believe that I got this to work"};
 
 ch_posts = [post1, post2, post3];
-localStorage.setItem('channels', ch_posts);
+
+
+channels = ["Master Chat", "Race Cars", "Hangout"];
+localStorage.setItem('channel_list', channels);
 
 
 
@@ -26,47 +29,69 @@ localStorage.setItem('channels', ch_posts);
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // if no display name is set, show input form
-    // if display name is set, show name
-    if (localStorage.getItem('display_name') === "null") {
+  // Connect to websocket
+  var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
-      // display input form
-      fn_display_inputfrm();
+  // Once socket is connected, configure "Add" button for channel_list
+  socket.on('connect', () => {
 
-      //set button function
-      document.querySelector('#btn_dispname').onclick =
+      // "Add" button should emit a new channel
+      document.querySelector('btn_add_channel').onclick =
               function() {
-                localStorage.setItem('display_name', document.querySelector('#txtinpt_dispname').value);
-                fn_display_name();
-              }
+                const new_channel = document.querySelector('#txt_add_channel').value;
+                socket.emit('add_channel', new_channel);
+          };
+      });
 
-      // enable button when entered display name is valid
-      document.querySelector('#txtinpt_dispname').onkeyup = () => {
-      // TODO: Ensure name contains 3 visible characters
-          if (document.querySelector('#txtinpt_dispname').value.length > 3)
-              document.querySelector('#btn_dispname').disabled = false;
-          else
-              document.querySelector('#btn_dispname').disabled = true;
-      };
+  // if no display name is set, show input form
+  // if display name is set, show name
+  if (localStorage.getItem('display_name') === "null") {
 
-    } else {
+    // display input form
+    fn_display_inputfrm();
 
-      // displpay name
-      fn_display_name();
-
-    }
+    //set button function
+    document.querySelector('#btn_dispname').onclick =
+            function() {
+              localStorage.setItem('display_name', document.querySelector('#txtinpt_dispname').value);
+              fn_display_name();
+            }
 
     // enable button when entered display name is valid
-    // start page with disabled button
-    document.querySelector('#btn_add_channel').disabled = true;
-
-    document.querySelector('#txt_add_channel').onkeyup = () => {
+    document.querySelector('#txtinpt_dispname').onkeyup = () => {
     // TODO: Ensure name contains 3 visible characters
-        if (document.querySelector('#txt_add_channel').value.length > 3)
-            document.querySelector('#btn_add_channel').disabled = false;
+    // TODO: Ensure display name is not taken by anyone else
+        if (document.querySelector('#txtinpt_dispname').value.length > 3)
+            document.querySelector('#btn_dispname').disabled = false;
         else
-            document.querySelector('#btn_add_channel').disabled = true;
+            document.querySelector('#btn_dispname').disabled = true;
     };
+
+  } else {
+
+    // displpay name
+    fn_display_name();
+
+  }
+
+  // enable button when entered display name is valid
+  // start page with disabled button
+  document.querySelector('#btn_add_channel').disabled = true;
+
+  document.querySelector('#txt_add_channel').onkeyup = () => {
+  // TODO: Ensure name contains 3 visible characters
+  // TODO: Ensure that channel name is unique
+      if (document.querySelector('#txt_add_channel').value.length > 3)
+          document.querySelector('#btn_add_channel').disabled = false;
+      else
+          document.querySelector('#btn_add_channel').disabled = true;
+  };
+
+
+  // When a new vote is announced, increase the count
+  socket.on('add_channel', new_channel => {
+      channels.append(new_channel)
+  });
 
     // updated channel and chat data from server to local storage
     // setup local storage variable for channel and chat data

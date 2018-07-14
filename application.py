@@ -24,7 +24,6 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
 Session(app)
 
-
 # list of all channels
 channel_list = ['general']
 
@@ -34,3 +33,9 @@ def index():
         return render_template("index.html", message="Provide a display name to start chatting!")
     else:
         return render_template("index.html", user_session=session["display_name"])
+
+
+@socketio.on("add_channel")
+def add_channel(channel):
+    channel_list.append(channel)
+    emit("channels", channel_list, broadcast=True)
