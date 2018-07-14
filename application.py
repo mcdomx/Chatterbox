@@ -38,4 +38,4 @@ def index():
 @socketio.on("add_channel")
 def add_channel(channel):
     channel_list.append(channel)
-    emit("channels", channel_list, broadcast=True)
+    emit("add_new_channel", channel, broadcast=True)
