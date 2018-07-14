@@ -7,13 +7,17 @@ $color2: hsla(212%, 88%, 58%, 1);
 $color3: hsla(22%, 100%, 60%, 1);
 $color4: hsla(250%, 39%, 45%, 1);
 $color5: hsla(124%, 45%, 38%, 1);
-$color_text: darkgrey;
+$color_text: lightgrey;
 
 $color_background: $color2;
 $color_font: $color_text;
 $color_background_login: $color2;
 $color_background_locinfo: $color4;
 $color_background_weather: $color5;
+$color_chat1: white;
+$color_chat2: $color_background;
+$color_chat3: black;
+$color_chat4: lightgrey;
 //END SASS CSCC Color Varaibles
 
 
@@ -38,35 +42,12 @@ header {
 
 //END HEADER AND FOOTER
 
-.container {
 
+
+
+a {
+  color: $color_text;
 }
-
-//Creates margins between specifc form elements
-input[type=email], input[type=password], , input[type=text]{
-  margin-bottom: 5px;
- }
-
-#loginwindow {
-  padding: 10px 15px 5px;
-  background-color: $color_background_login;
-}
-
-#searchwindow {
-  padding: 15px 15px 15px 15px;
-  background-color: $color_background_login;
-}
-
-#locwindow {
-  padding: 15px 15px 15px 15px;
-  background-color: $color_background_locinfo;
-}
-
-#weatherwindow {
-  padding: 15px 15px 15px 15px;
-  background-color: $color_background_weather;
-}
-
 
 a:hover {
   color: orange;
@@ -76,4 +57,19 @@ a:hover {
 
 p {
   text-align: justify;
+}
+
+#body_block {
+  margin-top: 13vh;
+  margin-bottom: 4vh;
+}
+
+#self_chatbox {
+  background-color: $color_chat2;
+  color: $color_chat1;
+}
+
+#other_chatbox {
+  background-color: $color_chat4;
+  color: $color_chat3;
 }

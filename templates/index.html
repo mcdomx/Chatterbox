@@ -1,42 +1,137 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html>
 
-{% block title %}
-    Chatterbox
-{% endblock %}
-
-
-{% if user_id is defined %}
-
-{% else %}
-  user_id="enter email" >
-{% endif %}
-
-{% if pwd is defined %}
-  id_pwd=pwd
-{% else %}
-  id_pwd="enter password"
-{% endif %}
+  <head>
+    <title>Chatterbox</title>
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, maximum-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS_project2.css') }}">
+    <script src="{{ url_for('static', filename='project2.js') }}"></script>
+  </head>
 
 
-{% block body %}
-      <!-- CONTAINER BODY_TEXT -->
-      {% if message is defined() %}
-        <p></p>
-        <div class="alert alert-warning col-6 mx-auto" role="alert">
-          {{ message }}
-        </div>
-      {% endif %}
+  <body>
 
-      {% if session["user_session"] is defined() %}
-      {% else %}
+    <!-- HEADER -->
+    <header class="row justify-content-center fixed-top">
+      <section class="col-6"><a href="{{ url_for('index') }}">Chatterbox</a></section>
 
-        <div class="container col-4" id="main_window">
+        <section class="col-6" align="right">
 
-        </div> <!-- end container -->
+          <!-- If display name has been set in location storage... -->
+          <div hidden id="txt_dispname"></div>
 
-      {% endif %}
+          <!-- If no display name has been set in local storage-->
+          <div hidden id="frm_dispname" >
+            <input type="text" id="txtinpt_dispname" autocomplete="off" autofocus placeholder="enter display name">
+            <button id="btn_dispname" disabled=true>Set</button>
+          </div>
+
+        </section>
+
+
+    </header>
+    <!-- end HEADER -->
 
 
 
-      <!-- end CONTAINER BODY_TEXT -->
-{% endblock %}
+    <!-- BODY BLOCK -->
+    <div id="body_block" class="container"> <!-- MAIN WINDOW -->
+      <div class="row border"> <!-- MAIN WINDOW ROW -->
+
+        <div class="col-3 border border-primary" style="min-width: 12rem"> <!-- LEFT COLUMN - CHANNELS -->
+
+          <!-- ADD NEW CHANNEL INPUT BOX -->
+          <div class="row">
+            <div class="input-group mb-3">
+              <input type="text" id="txt_add_channel" class="form-control" placeholder="new channel name">
+              <div class="input-group-append">
+                <button type="button" id="btn_add_channel" class="btn btn-success">Add</button>
+              </div>
+            </div> <!-- END INPUT GROUP -->
+          </div> <!-- END ROW -->
+          <!-- END - ADD NEW CHANNEL INPUT BOX -->
+
+
+
+
+            <div class="row">
+              <div class="card text-white bg-primary my-1" style="min-width: 14rem">
+                <a href="#1">
+                  <div class="card-header">Channel 1</div>
+                  <div class="card-body pt-1 pb-2 px-3">
+                    <!-- <h5 class="card-title">Primary card title</h5> -->
+                    <p class="card-text mx-0">
+                      <span>Owner: </span><br>
+                      <span># of Posts: </span><br>
+                      <span>Last Post: </span>
+                    </p>
+                  </div> <!-- END CARD BODY -->
+                </a>
+              </div><!-- END CARD  -->
+            </div> <!-- END ROW -->
+
+            <div class="row">
+              <div class="card text-white bg-primary my-1" style="min-width: 14rem">
+                <a href="#2">
+                  <div class="card-header">Channel 2</div>
+                  <div class="card-body pt-1 pb-2 px-3">
+                    <!-- <h5 class="card-title">Primary card title</h5> -->
+                    <p class="card-text mx-0">
+                      <span>Owner: </span><br>
+                      <span># of Posts: </span><br>
+                      <span>Last Post: </span>
+                    </p>
+                  </div> <!-- END CARD BODY -->
+                </a>
+              </div><!-- END CARD  -->
+            </div> <!-- END ROW -->
+
+
+        </div> <!-- LEFT COLUMN - CHANNELS -->
+
+
+
+
+        <div class="col-12 ml-4 border border-primary" style="min-width: 20rem; max-width: 40rem"> <!-- RIGHT COLUMN - CHAT -->
+          <div id="other_chatbox" class="row col-8           rounded mb-2 py-1">chat item 1</div>
+          <div id="self_chatbox"  class="row col-8 offset-4  rounded mb-2 py-1">chat item 1</div>
+          <div id="other_chatbox" class="row col-8           rounded mb-2 py-1">chat item 3</div>
+        </div> <!-- RIGHT COLUMN - CHAT -->
+
+
+
+
+      </div> <!-- MAIN WINDOW ROW -->
+
+
+      </div> <!-- MAIN WINDOW ROW -->
+    </div> <!-- MAIN WINDOW -->
+
+
+
+
+
+
+
+    <!-- END BODY BLOCK -->
+
+
+    <!-- FOOTER -->
+    <footer class="row justify-content-center fixed-bottom">
+      <section class="col-6">created by Mark McDonald</section>
+      <section class="col-5" align="right">
+        Right Aligned Footer
+      </section>
+    </footer>
+    <!-- end FOOTER -->
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+  </body>
+  </body>
+
+
+</html>

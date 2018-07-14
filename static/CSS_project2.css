@@ -2,7 +2,7 @@
 /* HSL */
 header, footer {
   padding: 15px 15px 50px 15px;
-  color: darkgrey;
+  color: lightgrey;
   background-color: #368ef2;
 }
 
@@ -15,28 +15,8 @@ header {
   height: 3vh;
 }
 
-input[type=email], input[type=password], input[type=text] {
-  margin-bottom: 5px;
-}
-
-#loginwindow {
-  padding: 10px 15px 5px;
-  background-color: #368ef2;
-}
-
-#searchwindow {
-  padding: 15px 15px 15px 15px;
-  background-color: #368ef2;
-}
-
-#locwindow {
-  padding: 15px 15px 15px 15px;
-  background-color: #5546a0;
-}
-
-#weatherwindow {
-  padding: 15px 15px 15px 15px;
-  background-color: #358d3b;
+a {
+  color: lightgrey;
 }
 
 a:hover {
@@ -46,6 +26,21 @@ a:hover {
 
 p {
   text-align: justify;
+}
+
+#body_block {
+  margin-top: 13vh;
+  margin-bottom: 4vh;
+}
+
+#self_chatbox {
+  background-color: #368ef2;
+  color: white;
+}
+
+#other_chatbox {
+  background-color: lightgrey;
+  color: black;
 }
 
 /*# sourceMappingURL=CSS_project2.css.map */

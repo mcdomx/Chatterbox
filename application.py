@@ -24,9 +24,13 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
 Session(app)
 
+
 # list of all channels
 channel_list = ['general']
 
 @app.route("/")
 def index():
-    return render_template("index.html", message="No message")
+    if session.get("display_name") is None:
+        return render_template("index.html", message="Provide a display name to start chatting!")
+    else:
+        return render_template("index.html", user_session=session["display_name"])

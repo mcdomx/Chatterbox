@@ -15,4 +15,12 @@ Each channel is represented by a randomly chosen color.  The header bar for each
 OPTIONAL:  Users can choose to put two chats side-by-side in the main screen.
 
 Chat and channel data is stored in a single server-side dictionary:
-  channel_chat[<channel_name>: <list of posts> ]
+  localStorage( <channel_name>, JSON.stringify(list of posts) )
+
+  post structure:
+  {"date": <epoch date>, "by": <user's display name>, "message": <post>}
+
+  all channel entries will have a channel name that is ch_<name of channel>.  This will allow for easier searching an iteration.
+
+User display name is stored as:
+  localStorage( "display_name", <user's display name> )
