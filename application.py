@@ -44,15 +44,11 @@ class Channel:
             channel_dict[channel] = Channel.all_channels[channel]
         return jsonify(channel_dict)
 
-    def jsonify_channel(self):
+    #create channel broadcast data and emit it
+    def emit_channel(ch_name):
         channel_dict = {}
-        channel_dict[self.name] = Channel.all_channels[self.name]
-        return jsonify(channel_dict)
-
-    def emit_channel(self):
-        emit_data = self.jsonify_channel();
-        # emit_data = {'billy idol':{'ch_owner':"Mark", 'last_post': 0}};
-        emit("add_new_channel", emit_data, broadcast=True)
+        channel_dict = {"ch_name": ch_name, "ch_owner": Channel.all_channels[ch_name]["ch_owner"], "last_post": Channel.all_channels[ch_name]["last_post"]}
+        emit("add_new_channel", channel_dict, broadcast=True)
 
     # return True if channel name already exists; False if name does not exist
     def exists(channel_name):
@@ -104,7 +100,7 @@ Channel("bed bugs", "Cindy")
 
 @app.route("/")
 def index():
-        return render_template("index.html")
+    return render_template("index.html")
 
 
 # add new name
@@ -121,21 +117,31 @@ def add_newname():
         return jsonify({"success": True})
 
 
-# add new channel
+
+# emit new channel
+@socketio.on("emit_channel")
+def emit_channel(ch_name):
+    Channel.emit_channel(ch_name);
+
+
+
+# add new channel -- this will not emit it
+# adding channel as soon as it is confirmed will avoid
+# the possibility that a second request for the same name
+# is approved and added before the emit-on process is completed.
 @app.route("/add_channel", methods=["POST"])
 def add_channel():
-    new_ch = request.form.get("new_ch")
+    ch_name = request.form.get("new_ch")
 
-    if (Channel.exists(new_ch)):
-        # return error
+    if (Channel.exists(ch_name)):
+        # channel exists, return error
         return jsonify({"success": False})
     else:
         # add channel and return success
-        ch_owner =  request.form.get("ch_owner")
-        new_channel = Channel(new_ch, ch_owner) # create new channel object
-        new_channel.emit_channel() # emit the new channel to all clients
-        return jsonify({"success": True})
-
+        owner =  request.form.get("ch_owner")
+        new_channel = Channel(ch_name, owner) # create new channel object
+        # TODO: remove test owner data
+        return jsonify({"success": True, "owner": owner})
 
 
 @app.route("/get_channels")

@@ -136,11 +136,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // name exists already - alert user - pick another name
         alert(`Channel '${new_ch}' is already being used.  Try a differnet name.`);
       } else {
-        // emit to
-
+        // emit new channel to to server
+        document.querySelector('#txt_add_channel').value = "";
+        socket.emit('emit_channel', new_ch);
       }
-
-
 
     } // end onload
 
@@ -148,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const channel = new FormData();
     channel.append('new_ch', new_ch);
     channel.append('ch_owner', localStorage.getItem('display_name'))
+
 
     // Send request
     // alert(`About to send request with ch_name:${channel('new_ch').value} and ch_owner:${channel['ch_owner']}`);
@@ -157,10 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
   } // end add channel on button click
 
 
-
   // When a new channel is announed by the server, add it to the channel list
-  socket.on('add_new_channel', new_channel => {
-      add_channel_card(new_channel["ch_name"], new_channel["ch_owner"]);
+  socket.on('add_new_channel', new_ch => {
+
+      add_channel_card(new_ch.ch_name, new_ch.ch_owner);
 
   });
 
@@ -231,7 +231,7 @@ function build_channel_list() {
 
 
 
-function add_channel_card(ch_name, ch_data) {
+function add_channel_card(ch_name, ch_owner) {
 
   const row = document.createElement('div');
   var row_attr = document.createAttribute("class");
@@ -269,7 +269,7 @@ function add_channel_card(ch_name, ch_data) {
 
   // ASSIGN CONTENT TO TAGS
   const p_owner = document.createElement('p');
-  p_owner.innerHTML = "Owner: " + ch_data["ch_owner"];
+  p_owner.innerHTML = "Owner: " + ch_owner;
 
   const p_numposts = document.createElement('p');
   p_numposts.innerHTML = "# of posts: ";
