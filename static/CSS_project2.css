@@ -33,6 +33,13 @@ p {
   margin: 0px;
 }
 
+.card-header {
+  font-size: 120%;
+  font-weight: 900;
+  color: white;
+  background-color: darkblue;
+}
+
 input[type=text] {
   margin-bottom: 5px;
 }
@@ -42,18 +49,22 @@ input[type=text] {
   margin-bottom: 4vh;
 }
 
+#main_window {
+  height: 75vh;
+}
+
 #frm_dispname {
   background-color: #368ef2;
   color: lightgrey;
   padding: 10px;
 }
 
-#self_chatbox {
+.self_chatbox {
   background-color: #368ef2;
   color: white;
 }
 
-#other_chatbox {
+.other_chatbox {
   background-color: lightgrey;
   color: black;
 }

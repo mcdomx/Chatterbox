@@ -218,7 +218,7 @@ function build_channel_list() {
 
     // for each channel in the list, add a channel card
     for (channel in channel_list) {
-      add_channel_card(channel, channel_list[channel])
+      add_channel_card(channel, channel_list[channel]['ch_owner'])
     }
 
     //build cards for channel list
@@ -235,12 +235,12 @@ function add_channel_card(ch_name, ch_owner) {
 
   const row = document.createElement('div');
   var row_attr = document.createAttribute("class");
-  row_attr.value = "row";
+  row_attr.value = "row mx-auto";
   row.setAttributeNode(row_attr)
 
   const card = document.createElement('div');
   var card_attr1 = document.createAttribute("class");
-  card_attr1.value = "card text-white bg-primary my-1";
+  card_attr1.value = "card text-white bg-primary my-1 mx-auto";
   card.setAttributeNode(card_attr1);
   var card_attr2 = document.createAttribute("style")
   card_attr2.value = "min-width: 14rem";

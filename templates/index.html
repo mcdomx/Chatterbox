@@ -37,54 +37,76 @@
     <!-- BODY BLOCK - WHEN NOT REGISTERED -->
     <!-- If no display name has been set in local storage-->
     <div class="container col-4 form-group" id="register_block">
-
       <form id="frm_dispname" >
         <h5>Create a display name to continue.</h5>
         <input type="text" id="txtinput_dispname" autocomplete="off" autofocus placeholder="enter display name">
         <button type="submit" id="btn_dispname" disabled=true>Set</button>
       </form>
-    </div>
+    </div> <!-- END CONTAINER -->
     <!-- END BODY BLOCK - WHEN NOT REGISTERED -->
 
 
 
     <!-- BODY BLOCK - WHEN REGISTERED -->
-    <div hidden id="body_block" class="container"> <!-- MAIN WINDOW -->
+    <div hidden id="body_block" class="container-fluid"> <!-- MAIN WINDOW -->
 
-      <div class="row">{{ message }}</div>
+      <div id="main_window" class="row border"> <!-- MAIN WINDOW ROW -->
 
-      <div class="row border"> <!-- MAIN WINDOW ROW -->
 
-        <div class="col-3 border border-primary" style="min-width: 12rem"> <!-- LEFT COLUMN - CHANNELS -->
+          <div class="border border-primary mx-2" style="min-width: 16rem"> <!-- LEFT COLUMN - CHANNELS -->
 
-          <!-- ADD NEW CHANNEL INPUT BOX -->
-          <div class="row">
-            <form id="frm_add_channel">
-              <div class="input-group mb-3">
-                <input type="text" id="txt_add_channel" class="form-control" placeholder="new channel name">
-                <div class="input-group-append">
-                  <button type="submit" id="btn_add_channel" class="btn btn-success">Add</button>
-                </div>
-              </div> <!-- END INPUT GROUP -->
-            </form>
-          </div> <!-- END ROW -->
-          <!-- END - ADD NEW CHANNEL INPUT BOX -->
+            <!-- ADD NEW CHANNEL INPUT BOX -->
+            <div class="row">
+              <form id="frm_add_channel" class="mx-auto">
+                <div class="input-group mb-3">
+                  <input type="text" id="txt_add_channel" class="form-control" placeholder="new channel name">
+                  <div class="input-group-append">
+                    <button type="submit" id="btn_add_channel" class="btn btn-success">Add</button>
+                  </div>
+                </div> <!-- END INPUT GROUP -->
+              </form>
+            </div> <!-- END ROW -->
+            <!-- END - ADD NEW CHANNEL INPUT BOX -->
 
-            <!-- CHANNEL LISTING -->
-            <!-- class="card-group" -->
-            <div id="channel_listing"></div>
-            <!-- END CARD-GROUP for CHANNEL_LISTING-->
+              <!-- CHANNEL LISTING -->
+              <div id="channel_listing">
+              </div>
+              <!-- END CARD-GROUP for CHANNEL_LISTING-->
 
-        </div> <!-- LEFT COLUMN - CHANNELS -->
-
+          </div> <!-- LEFT COLUMN - CHANNELS -->
 
 
 
-        <div class="col-12 ml-4 border border-primary" style="min-width: 20rem; max-width: 40rem"> <!-- RIGHT COLUMN - CHAT -->
-          <div id="other_chatbox" class="row col-8           rounded mb-2 py-1">chat item 1</div>
-          <div id="self_chatbox"  class="row col-8 offset-4  rounded mb-2 py-1">chat item 1</div>
-          <div id="other_chatbox" class="row col-8           rounded mb-2 py-1">chat item 3</div>
+
+
+        <!-- CHAT BOX COLUMN -->
+        <div class="container border border-primary ml-1 mr-0" style="min-width: 20rem; max-width: 50rem"> <!-- RIGHT COLUMN - CHAT -->
+
+          <div class"row"> <!-- ROW FOR ALL CHAT ELEMENTS -->
+            <div class="container">
+              <div class="col-8           rounded mb-2 py-1 other_chatbox">chat item 1</div>
+              <div class="col-8 offset-4  rounded mb-2 py-1 self_chatbox">chat item 1</div>
+              <div class="col-8           rounded mb-2 py-1 other_chatbox">chat item 3</div>
+            </div>
+          </div> <!-- ROW FOR ALL CHAT ELEMENTS -->
+
+          <div class="row"> <!-- ROW FOR CHAT POST -->
+            <div class="col align-self-end">
+              <form id="frm_add_post">
+                <div class="input-group mb-3">
+                  <input type="text" id="txt_add_post" class="form-control" placeholder="add message ... ">
+                  <div class="input-group-append">
+                    <button type="submit" id="btn_add_post" class="btn btn-success">Post</button>
+                  </div>
+                </div> <!-- END INPUT GROUP -->
+              </form>
+          </div><!-- Column -->
+          </div> <!-- ROW FOR CHAT POST -->
+
+
         </div> <!-- RIGHT COLUMN - CHAT -->
+
+        <!-- CHAT BOX COLUMN -->
 
 
 

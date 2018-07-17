@@ -62,6 +62,13 @@ p {
   margin: 0px;
 }
 
+.card-header {
+  font-size: 120%;
+  font-weight: 900;
+  color: white;
+  background-color: darkblue;
+}
+
 //Creates margins between specifc form elements
 input[type=text]{
   margin-bottom: 5px;
@@ -72,18 +79,22 @@ input[type=text]{
   margin-bottom: 4vh;
 }
 
+#main_window {
+  height:75vh;
+}
+
 #frm_dispname {
   background-color: $color_background_login;
   color: $color_font;
   padding: 10px;
 }
 
-#self_chatbox {
+.self_chatbox {
   background-color: $color_chat2;
   color: $color_chat1;
 }
 
-#other_chatbox {
+.other_chatbox {
   background-color: $color_chat4;
   color: $color_chat3;
 }

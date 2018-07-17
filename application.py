@@ -140,8 +140,7 @@ def add_channel():
         # add channel and return success
         owner =  request.form.get("ch_owner")
         new_channel = Channel(ch_name, owner) # create new channel object
-        # TODO: remove test owner data
-        return jsonify({"success": True, "owner": owner})
+        return jsonify({"success": True})
 
 
 @app.route("/get_channels")
