@@ -37,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // enable button when entered display name is valid
     document.querySelector('#txtinput_dispname').onkeyup = () => {
     // TODO: Ensure name contains 3 visible characters
-    // TODO: Ensure display name is not taken by anyone else
         if (document.querySelector('#txtinput_dispname').value.length > 3)
             document.querySelector('#btn_dispname').disabled = false;
         else
@@ -97,20 +96,14 @@ document.addEventListener('DOMContentLoaded', () => {
       // Build list of channels from server
       build_channel_list();
 
-      // "Add" button should emit a new channel
-      // document.querySelector('#btn_add_channel').onclick = () => {
-      //       const new_channel = document.querySelector('#txt_add_channel').value;
-            // alert(`Adding channel: ${new_channel} ${localStorage.getItem('display_name')}`);
-            // socket.emit('add_channel', new_channel, localStorage.getItem('display_name'));
-          // };
   }); // end on connect
 
 
 
-  // enable "add channel" button when entered display name is valid
-  // start page with disabled button
+  // start page with disabled "Add channel" button
   document.querySelector('#btn_add_channel').disabled = true;
 
+  // enable "add channel" button when entered display name is valid
   document.querySelector('#txt_add_channel').onkeyup = () => {
   // TODO: Ensure name contains 3 visible characters
       if (document.querySelector('#txt_add_channel').value.length > 3)
@@ -119,10 +112,15 @@ document.addEventListener('DOMContentLoaded', () => {
           document.querySelector('#btn_add_channel').disabled = true;
   };
 
-  // add new channel to global list from user
+
+  // When user clicks to add a new channel,
+  // first, check to see if channel name is in use.
+  // If not in use, let server add channel to global list
+  // and then let server emit new channelt to all clients.
   document.querySelector('#btn_add_channel').onclick = () => {
+
     // determine if channel already exists
-    //initialize new request
+    // initialize new request
     const ch_exists = new XMLHttpRequest();
     const new_ch = document.querySelector('#txt_add_channel').value;
     ch_exists.open('POST', '/add_channel');
@@ -137,18 +135,22 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response["success"]) {
         // name exists already - alert user - pick another name
         alert(`Channel '${new_ch}' is already being used.  Try a differnet name.`);
+      } else {
+        // emit to
+
       }
 
-      // else: let the server create the channel and braodcast the new listing
+
 
     } // end onload
 
-    // Add data to send with request
+    // Add channel name and display name to request sent to server
     const channel = new FormData();
     channel.append('new_ch', new_ch);
     channel.append('ch_owner', localStorage.getItem('display_name'))
 
     // Send request
+    // alert(`About to send request with ch_name:${channel('new_ch').value} and ch_owner:${channel['ch_owner']}`);
     ch_exists.send(channel);
     return false; // avoid sending the form and creating an HTTP POST request
 

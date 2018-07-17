@@ -37,15 +37,22 @@ class Channel:
     def add_post(self, post):
         self.all_posts.append(post)
 
-    def emit_channel(self):
-        emit("add_new_channel", jsonify(self.__dict__), broadcast=True)
-
     def jsonify_channels():
         channel_dict = {}
         # TODO: If no channels exist - give appropriate reponse
         for channel in Channel.all_channels:
             channel_dict[channel] = Channel.all_channels[channel]
         return jsonify(channel_dict)
+
+    def jsonify_channel(self):
+        channel_dict = {}
+        channel_dict[self.name] = Channel.all_channels[self.name]
+        return jsonify(channel_dict)
+
+    def emit_channel(self):
+        emit_data = self.jsonify_channel();
+        # emit_data = {'billy idol':{'ch_owner':"Mark", 'last_post': 0}};
+        emit("add_new_channel", emit_data, broadcast=True)
 
     # return True if channel name already exists; False if name does not exist
     def exists(channel_name):
