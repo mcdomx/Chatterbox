@@ -12,8 +12,6 @@ $color_text: lightgrey;
 $color_background: $color2;
 $color_font: $color_text;
 $color_background_login: $color2;
-$color_background_locinfo: $color4;
-$color_background_weather: $color5;
 $color_chat1: white;
 $color_chat2: $color_background;
 $color_chat3: black;
@@ -57,11 +55,27 @@ a:hover {
 
 p {
   text-align: justify;
+  margin: 0px;
 }
 
-#body_block {
+.card_element {
+  margin: 0px;
+}
+
+//Creates margins between specifc form elements
+input[type=text]{
+  margin-bottom: 5px;
+ }
+
+#body_block, #frm_dispname {
   margin-top: 13vh;
   margin-bottom: 4vh;
+}
+
+#frm_dispname {
+  background-color: $color_background_login;
+  color: $color_font;
+  padding: 10px;
 }
 
 #self_chatbox {

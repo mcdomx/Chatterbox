@@ -1,7 +1,7 @@
-
+// localStorage.clear();
 
 // Get localStorage item for display name -- setup if none exists
-if (!localStorage.getItem('display_name'))
+if ( !localStorage.getItem('display_name') )
     localStorage.setItem('display_name', "null");
 
 // DEVELOPMENT: set dislpay_name localStorage item to null
@@ -20,14 +20,73 @@ post3 = {"date": 1531517947, "by": "Mark", "post": "Thanks, I can't believe that
 ch_posts = [post1, post2, post3];
 
 
-channels = ["Master Chat", "Race Cars", "Hangout"];
-localStorage.setItem('channel_list', channels);
-
-
-
 // Load current value of dislpay_name
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  // if no display name is set, show input form
+  // if display name is set, show name
+  if (localStorage.getItem('display_name') === "null") {
+
+    // display input form
+    show_register_block();
+
+    //set new user name form to get AJAX data from server in order to
+    //check of name conflict
+
+    // enable button when entered display name is valid
+    document.querySelector('#txtinput_dispname').onkeyup = () => {
+    // TODO: Ensure name contains 3 visible characters
+    // TODO: Ensure display name is not taken by anyone else
+        if (document.querySelector('#txtinput_dispname').value.length > 3)
+            document.querySelector('#btn_dispname').disabled = false;
+        else
+            document.querySelector('#btn_dispname').disabled = true;
+    };
+
+    document.querySelector('#frm_dispname').onsubmit = () => {
+
+      //initialize new request
+      const name_exists = new XMLHttpRequest();
+      const new_name = document.querySelector('#txtinput_dispname').value;
+      name_exists.open('POST', '/add_newname');
+
+      //when request is completed
+      name_exists.onload = () => {
+
+        //extract JSON data from request
+        const response = JSON.parse(name_exists.responseText)
+
+        //check existing_users for new name
+        if (response["success"]) {
+          // add name to list of users
+          localStorage.setItem('display_name', new_name);
+          show_body_block();
+        } else {
+          // name exists - present error and allow new entry
+          alert(`Display name '${new_name}' is already taken.  Try a differnet name.`);
+        } // end if else
+
+      } // end onload
+
+      // Add data to send with request
+      const data = new FormData();
+      data.append('new_name', new_name);
+
+      // Send request
+      name_exists.send(data);
+      return false; // avoid sending the form and creating an HTTP POST request
+
+    } // end onsubmit frm_dispname
+
+  } else {
+
+    // user has created a display name already -- display chat window
+    show_body_block();
+
+  } // end if else - display name
+
+
 
   // Connect to websocket
   var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
@@ -35,77 +94,72 @@ document.addEventListener('DOMContentLoaded', () => {
   // Once socket is connected, configure "Add" button for channel_list
   socket.on('connect', () => {
 
+      // Build list of channels from server
+      build_channel_list();
+
       // "Add" button should emit a new channel
-      document.querySelector('#btn_add_channel').onclick = () => {
-
-            const new_channel = document.querySelector('#txt_add_channel').value;
-            alert(`Adding channel: ${new_channel}`);
-            socket.emit('add_channel', new_channel);
-          };
-      });
-
-
-
-  // When a new channel is added, add the channel to the global list
-  socket.on('add_new_channel', channel => {
-      // add the new channel to the list of channels
+      // document.querySelector('#btn_add_channel').onclick = () => {
+      //       const new_channel = document.querySelector('#txt_add_channel').value;
+            // alert(`Adding channel: ${new_channel} ${localStorage.getItem('display_name')}`);
+            // socket.emit('add_channel', new_channel, localStorage.getItem('display_name'));
+          // };
+  }); // end on connect
 
 
 
-      // document.querySelector('#yes').innerHTML = data.yes;
-
-  });
-
-  // if no display name is set, show input form
-  // if display name is set, show name
-  if (localStorage.getItem('display_name') === "null") {
-
-    // display input form
-    fn_display_inputfrm();
-
-    //set button function
-    document.querySelector('#btn_dispname').onclick =
-            function() {
-              localStorage.setItem('display_name', document.querySelector('#txtinpt_dispname').value);
-              fn_display_name();
-            }
-
-    // enable button when entered display name is valid
-    document.querySelector('#txtinpt_dispname').onkeyup = () => {
-    // TODO: Ensure name contains 3 visible characters
-    // TODO: Ensure display name is not taken by anyone else
-        if (document.querySelector('#txtinpt_dispname').value.length > 3)
-            document.querySelector('#btn_dispname').disabled = false;
-        else
-            document.querySelector('#btn_dispname').disabled = true;
-    };
-
-  } else {
-
-    // displpay name
-    fn_display_name();
-
-  }
-
-  // enable button when entered display name is valid
+  // enable "add channel" button when entered display name is valid
   // start page with disabled button
   document.querySelector('#btn_add_channel').disabled = true;
 
   document.querySelector('#txt_add_channel').onkeyup = () => {
   // TODO: Ensure name contains 3 visible characters
-  // TODO: Ensure that channel name is unique
       if (document.querySelector('#txt_add_channel').value.length > 3)
           document.querySelector('#btn_add_channel').disabled = false;
       else
           document.querySelector('#btn_add_channel').disabled = true;
   };
 
+  // add new channel to global list from user
+  document.querySelector('#btn_add_channel').onclick = () => {
+    // determine if channel already exists
+    //initialize new request
+    const ch_exists = new XMLHttpRequest();
+    const new_ch = document.querySelector('#txt_add_channel').value;
+    ch_exists.open('POST', '/add_channel');
 
-  // When a new vote is announced, increase the count
+    //when request is completed
+    ch_exists.onload = () => {
+
+      //extract JSON data from request
+      const response = JSON.parse(ch_exists.responseText)
+
+      //check existing channels for new channel name
+      if (!response["success"]) {
+        // name exists already - alert user - pick another name
+        alert(`Channel '${new_ch}' is already being used.  Try a differnet name.`);
+      }
+
+      // else: let the server create the channel and braodcast the new listing
+
+    } // end onload
+
+    // Add data to send with request
+    const channel = new FormData();
+    channel.append('new_ch', new_ch);
+    channel.append('ch_owner', localStorage.getItem('display_name'))
+
+    // Send request
+    ch_exists.send(channel);
+    return false; // avoid sending the form and creating an HTTP POST request
+
+  } // end add channel on button click
+
+
+
+  // When a new channel is announed by the server, add it to the channel list
   socket.on('add_new_channel', new_channel => {
-      // document.querySelector('#new_div').innerHTML = add_channel_to_list(new_channel);
-      //THIS IS WHERE I LEFT OFF!!!!!!
-      document.querySelector('#new_div').createElement = add_channel_to_list(new_channel);
+      add_channel_card(new_channel["ch_name"], new_channel["ch_owner"]);
+
   });
 
     // updated channel and chat data from server to local storage
@@ -129,30 +183,116 @@ document.addEventListener('DOMContentLoaded', () => {
 // SUPPORTING FUNCTIONS
 
 // display textbox input form for user to enter a display name
-function fn_display_inputfrm() {
-  document.querySelector('#frm_dispname').hidden = false;
+function show_register_block() {
+  document.querySelector('#register_block').hidden = false;
   document.querySelector('#txt_dispname').hidden = true;
 
 };
 
 // display user's display name
-function fn_display_name() {
-  document.querySelector('#frm_dispname').hidden = true;
+function show_body_block() {
+  document.querySelector('#register_block').hidden = true;
   document.querySelector('#txt_dispname').hidden = false;
+  document.querySelector('#body_block').hidden = false;
   document.querySelector('#txt_dispname').innerHTML =
                         `Display Name: ${localStorage.getItem('display_name')}`;
 
 };
 
 
-function add_channel_to_list(channel) {
-  // Create new item for list
-  const div_row = document.createElement('div');
-  div_row.innerHTML = "New Div Here";
-  return div_row;
 
-};
+// on initial load of page, build the list of of channels stored on server
+function build_channel_list() {
 
+  //initialize new request
+  const get_channels = new XMLHttpRequest();
+  get_channels.open('GET', '/get_channels');
+
+  //when request is completed
+  get_channels.onload = () => {
+
+    //extract JSON data from request
+    const channel_list = JSON.parse(get_channels.responseText)
+
+    // for each channel in the list, add a channel card
+    for (channel in channel_list) {
+      add_channel_card(channel, channel_list[channel])
+    }
+
+    //build cards for channel list
+
+  } // end onload
+
+  get_channels.send();
+
+} // end build_channel_list()
+
+
+
+function add_channel_card(ch_name, ch_data) {
+
+  const row = document.createElement('div');
+  var row_attr = document.createAttribute("class");
+  row_attr.value = "row";
+  row.setAttributeNode(row_attr)
+
+  const card = document.createElement('div');
+  var card_attr1 = document.createAttribute("class");
+  card_attr1.value = "card text-white bg-primary my-1";
+  card.setAttributeNode(card_attr1);
+  var card_attr2 = document.createAttribute("style")
+  card_attr2.value = "min-width: 14rem";
+  card.setAttributeNode(card_attr2);
+
+  const anchor = document.createElement('a');
+  var a_attr = document.createAttribute("href");
+  a_attr.value = "#" + ch_name;
+  anchor.setAttributeNode(a_attr);
+
+  const card_head = document.createElement('div');
+  var card_head_attr = document.createAttribute("class");
+  card_head_attr.value = "card-header";
+  card_head.setAttributeNode(card_head_attr);
+  card_head.innerHTML = ch_name
+
+  const card_body = document.createElement('div');
+  var card_body_attr = document.createAttribute("class");
+  card_body_attr.value = "card-body pt-1 pb-2 px-3";
+  card_body.setAttributeNode(card_body_attr);
+
+  const card_text = document.createElement('p');
+  var card_text_attr = document.createAttribute("class");
+  card_text_attr.value = "card-text mx-0";
+  card_text.setAttributeNode(card_text_attr);
+
+  // ASSIGN CONTENT TO TAGS
+  const p_owner = document.createElement('p');
+  p_owner.innerHTML = "Owner: " + ch_data["ch_owner"];
+
+  const p_numposts = document.createElement('p');
+  p_numposts.innerHTML = "# of posts: ";
+
+  const p_lastpost = document.createElement('p');
+  p_lastpost.innerHTML = "Last Post: ";
+
+  card_text.appendChild(p_owner);
+  card_text.appendChild(p_numposts);
+  card_text.appendChild(p_lastpost);
+  card_body.appendChild(card_text);
+  anchor.appendChild(card_head);
+  anchor.appendChild(card_body);
+  card.appendChild(anchor);
+  row.appendChild(card);
+  document.querySelector('#channel_listing').appendChild(row);
+
+
+} // end build_channel_card()
+
+
+// var h1 = document.getElementsByTagName("H1")[0];   // Get the first <h1> element in the document
+// var att = document.createAttribute("class");       // Create a "class" attribute
+// att.value = "democlass";                           // Set the value of the class attribute
+// h1.setAttributeNode(att);
 
 // <!-- CHANNEL -->
 // <div class="row">
@@ -180,3 +320,10 @@ function add_channel_to_list(channel) {
     //         document.querySelector('#counter').innerHTML = counter;
     //         localStorage.setItem('counter', counter)
     //     }, 1000);
+
+    // Create new item for list
+    // const li = document.createElement('li');
+    // li.innerHTML = document.querySelector('#task').value;
+    //
+    // // Add new item to task list
+    // document.querySelector('#tasks').append(li);

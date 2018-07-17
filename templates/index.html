@@ -22,11 +22,11 @@
           <!-- If display name has been set in location storage... -->
           <div hidden id="txt_dispname"></div>
 
-          <!-- If no display name has been set in local storage-->
-          <div hidden id="frm_dispname" >
-            <input type="text" id="txtinpt_dispname" autocomplete="off" autofocus placeholder="enter display name">
-            <button id="btn_dispname" disabled=true>Set</button>
-          </div>
+
+          <!-- <form hidden id="frm_dispname" >
+            <input type="text" id="txtinput_dispname" autocomplete="off" autofocus placeholder="enter display name">
+            <button type="submit" id="btn_dispname" disabled=true>Set</button>
+          </form> -->
 
         </section>
 
@@ -34,68 +34,46 @@
     </header>
     <!-- end HEADER -->
 
+    <!-- BODY BLOCK - WHEN NOT REGISTERED -->
+    <!-- If no display name has been set in local storage-->
+    <div class="container col-4 form-group" id="register_block">
+
+      <form id="frm_dispname" >
+        <h5>Create a display name to continue.</h5>
+        <input type="text" id="txtinput_dispname" autocomplete="off" autofocus placeholder="enter display name">
+        <button type="submit" id="btn_dispname" disabled=true>Set</button>
+      </form>
+    </div>
+    <!-- END BODY BLOCK - WHEN NOT REGISTERED -->
 
 
-    <!-- BODY BLOCK -->
-    <div id="body_block" class="container"> <!-- MAIN WINDOW -->
+
+    <!-- BODY BLOCK - WHEN REGISTERED -->
+    <div hidden id="body_block" class="container"> <!-- MAIN WINDOW -->
+
+      <div class="row">{{ message }}</div>
+
       <div class="row border"> <!-- MAIN WINDOW ROW -->
 
         <div class="col-3 border border-primary" style="min-width: 12rem"> <!-- LEFT COLUMN - CHANNELS -->
 
           <!-- ADD NEW CHANNEL INPUT BOX -->
           <div class="row">
-            <div class="input-group mb-3">
-              <input type="text" id="txt_add_channel" class="form-control" placeholder="new channel name">
-              <div class="input-group-append">
-                <button type="button" id="btn_add_channel" class="btn btn-success">Add</button>
-              </div>
-            </div> <!-- END INPUT GROUP -->
+            <form id="frm_add_channel">
+              <div class="input-group mb-3">
+                <input type="text" id="txt_add_channel" class="form-control" placeholder="new channel name">
+                <div class="input-group-append">
+                  <button type="submit" id="btn_add_channel" class="btn btn-success">Add</button>
+                </div>
+              </div> <!-- END INPUT GROUP -->
+            </form>
           </div> <!-- END ROW -->
           <!-- END - ADD NEW CHANNEL INPUT BOX -->
 
-            <!-- TEST -->
-            <div id="new_div"></div>
-
-
-            <!-- END TEST -->
-
-
-            <!-- CHANNEL -->
-            <div class="row">
-              <div class="card text-white bg-primary my-1" style="min-width: 14rem">
-                <a href="#1">
-                  <div class="card-header">Channel 1</div>
-                  <div class="card-body pt-1 pb-2 px-3">
-                    <!-- <h5 class="card-title">Primary card title</h5> -->
-                    <p class="card-text mx-0">
-                      <span>Owner: </span><br>
-                      <span># of Posts: </span><br>
-                      <span>Last Post: </span>
-                    </p>
-                  </div> <!-- END CARD BODY -->
-                </a>
-              </div><!-- END CARD  -->
-            </div> <!-- END ROW -->
-            <!-- END CHANNEL -->
-
-            <!-- CHANNEL -->
-            <div class="row">
-              <div class="card text-white bg-primary my-1" style="min-width: 14rem">
-                <a href="#2">
-                  <div class="card-header">Channel 2</div>
-                  <div class="card-body pt-1 pb-2 px-3">
-                    <!-- <h5 class="card-title">Primary card title</h5> -->
-                    <p class="card-text mx-0">
-                      <span>Owner: </span><br>
-                      <span># of Posts: </span><br>
-                      <span>Last Post: </span>
-                    </p>
-                  </div> <!-- END CARD BODY -->
-                </a>
-              </div><!-- END CARD  -->
-            </div> <!-- END ROW -->
-            <!-- END CHANNEL -->
-
+            <!-- CHANNEL LISTING -->
+            <!-- class="card-group" -->
+            <div id="channel_listing"></div>
+            <!-- END CARD-GROUP for CHANNEL_LISTING-->
 
         </div> <!-- LEFT COLUMN - CHANNELS -->
 

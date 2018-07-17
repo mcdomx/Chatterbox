@@ -26,11 +26,26 @@ a:hover {
 
 p {
   text-align: justify;
+  margin: 0px;
 }
 
-#body_block {
+.card_element {
+  margin: 0px;
+}
+
+input[type=text] {
+  margin-bottom: 5px;
+}
+
+#body_block, #frm_dispname {
   margin-top: 13vh;
   margin-bottom: 4vh;
+}
+
+#frm_dispname {
+  background-color: #368ef2;
+  color: lightgrey;
+  padding: 10px;
 }
 
 #self_chatbox {
