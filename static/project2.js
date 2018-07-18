@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
       data.append('new_name', new_name);
 
       // Send request
+      //TODO: See if I can do this without using FormData.  Just send new_name.  Will need to chaneg Python function.
       name_exists.send(data);
       return false; // avoid sending the form and creating an HTTP POST request
 
@@ -112,8 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
           document.querySelector('#btn_add_channel').disabled = true;
   };
 
-
-  // When user clicks to add a new channel,
+  // *****************  ADD CHANNEL
   // first, check to see if channel name is in use.
   // If not in use, let server add channel to global list
   // and then let server emit new channelt to all clients.
@@ -148,9 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
     channel.append('new_ch', new_ch);
     channel.append('ch_owner', localStorage.getItem('display_name'))
 
-
     // Send request
-    // alert(`About to send request with ch_name:${channel('new_ch').value} and ch_owner:${channel['ch_owner']}`);
     ch_exists.send(channel);
     return false; // avoid sending the form and creating an HTTP POST request
 
@@ -163,17 +161,41 @@ document.addEventListener('DOMContentLoaded', () => {
       add_channel_card(new_ch.ch_name, new_ch.ch_owner);
 
   });
+  // *****************  END ADD CHANNEL
+
+
+
+
+
+  // *****************  ADD POST
+  // first, check to see if channel name is in use.
+  // If not in use, let server add channel to global list
+  // and then let server emit new channelt to all clients.
+  document.querySelector('#btn_add_post').onclick = () => {
+
+        // emit new post to to server
+        document.querySelector('#txt_add_post').value = "";
+        socket.emit('emit_post', post_ch, post_txt, post_user, post_time);
+
+  } // end add channel on button click
+
+
+  // When a new channel is announed by the server, add it to the channel list
+  socket.on('add_new_post', new_ch => {
+
+      add_channel_card(new_ch.ch_name, new_ch.ch_owner);
+
+  });
+  // *****************  END ADD Post
+
+
+
+
+
 
     // updated channel and chat data from server to local storage
-    // setup local storage variable for channel and chat data
-
-
-    // then, draw channel column
     // select most recently viewed channel
     // display updated chat messages
-
-    // add channel when Add button is pressed
-    // first, ensure that a localStorage item exists for
 
 
 });

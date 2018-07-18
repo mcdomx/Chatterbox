@@ -59,10 +59,12 @@ class Channel:
 
 
 class Post():
-    def __init__(self, channel, user_name, user_post):
-        self.user_name = user_name
-        self.user_post = user_post
-        self.post_time = datetime.datetime.now()
+    def __init__(self, post_ch, post_txt, post_user, post_time):
+        self.ch = post_ch
+        self.txt = post_txt
+        self.user = post_user
+        self.time = post_time
+        # get the channel that the post will be added to
         channel.add_post(self)
 
 # END CLASS DEFINITIONS

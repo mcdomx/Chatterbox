@@ -89,6 +89,32 @@ input[type=text]{
   padding: 10px;
 }
 
+%chat_header_items {
+  padding: 5px;
+  font-size: 120%;
+  font-weight: 900;
+}
+
+#chat_header1 {
+  @extend %chat_header_items;
+  color: white;
+  background-color: darkblue;
+}
+
+#chat_header2 {
+  @extend %chat_header_items;
+  color: white;
+  background-color: darkblue;
+}
+
+#chat_header3 {
+  @extend %chat_header_items;
+  color: white;
+  background-color: darkblue;
+}
+
+
+
 .self_chatbox {
   background-color: $color_chat2;
   color: $color_chat1;

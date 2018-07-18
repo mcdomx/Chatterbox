@@ -59,6 +59,27 @@ input[type=text] {
   padding: 10px;
 }
 
+#chat_header3, #chat_header2, #chat_header1 {
+  padding: 5px;
+  font-size: 120%;
+  font-weight: 900;
+}
+
+#chat_header1 {
+  color: white;
+  background-color: darkblue;
+}
+
+#chat_header2 {
+  color: white;
+  background-color: darkblue;
+}
+
+#chat_header3 {
+  color: white;
+  background-color: darkblue;
+}
+
 .self_chatbox {
   background-color: #368ef2;
   color: white;
