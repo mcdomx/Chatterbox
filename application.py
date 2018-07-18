@@ -29,7 +29,7 @@ class Channel:
     # TODO: Create a list that holds all the channel objects
     # TODO: try to eliminate the use of all_channel and user channel_list instead
     channel_list = {} # dict{"ch_name": ch_object}
-
+    
     def __init__(self, name, owner):
         self.name = name
         self.owner = owner
