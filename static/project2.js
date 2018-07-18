@@ -10,9 +10,9 @@ if ( !localStorage.getItem('display_name') )
 
 // Get localStorage item for channels and chats -- setup if none exists
 // TODO: do i need this?
-if (!localStorage.getItem('channels')) {
-    localStorage.setItem('channels', "null");
-  }
+// if (!localStorage.getItem('channels')) {
+//     localStorage.setItem('channels', "null");
+//   }
 
 // Assign values to global Variables
 

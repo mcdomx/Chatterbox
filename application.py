@@ -26,16 +26,27 @@ class Channel:
     max_posts = 100;
     all_channels = {}  # class variable to hold dict of all channel names and owners
 
+    # TODO: Create a list that holds all the channel objects
+    # TODO: try to eliminate the use of all_channel and user channel_list instead
+    channel_list = {} # dict{"ch_name": ch_object}
+
     def __init__(self, name, owner):
         self.name = name
         self.owner = owner
+        self.last_post = 0
         # add new channel to list of channels
         self.__class__.all_channels[self.name] = {'ch_owner': self.owner, 'last_post': 0}
-        all_posts = []  # instanace variable to hold ordered list of channel posts
+        channel_list.append = {self.name, self}
+        all_posts = []  # instanace variable to hold ordered list of post objects
 
 
     def add_post(self, post):
         self.all_posts.append(post)
+        if self.all_posts.length > 100:
+            self.all_posts.pop[0]
+
+    def get_channel(ch_name):
+        return channel_list[ch_name]
 
     def jsonify_channels():
         channel_dict = {}
@@ -64,8 +75,12 @@ class Post():
         self.txt = post_txt
         self.user = post_user
         self.time = post_time
+
         # get the channel that the post will be added to
-        channel.add_post(self)
+        active_channel = get_channel(post_ch)
+        active_channel.add_post(self)
+
+
 
 # END CLASS DEFINITIONS
 
