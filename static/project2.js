@@ -9,18 +9,19 @@ if ( !localStorage.getItem('display_name') )
 
 
 // Get localStorage item for channels and chats -- setup if none exists
+// TODO: do i need this?
 if (!localStorage.getItem('channels')) {
     localStorage.setItem('channels', "null");
   }
 
-post1 = {"date": 1531517747, "by": "Mark", "post": "This is the first message in my new system"};
-post2 = {"date": 1531517847, "by": "Jerry", "post": "Wow!  Great work."};
-post3 = {"date": 1531517947, "by": "Mark", "post": "Thanks, I can't believe that I got this to work"};
+// Assign values to global Variables
 
-ch_posts = [post1, post2, post3];
+// Get the last active channel viewed - create localStorage item if none
+// 'active_channel' holds the channel currently being viewed
+if (!localStorage.getItem('active_channel')) {
+    localStorage.setItem('active_channel', "null");
+  }
 
-
-// Load current value of dislpay_name
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -34,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //set new user name form to get AJAX data from server in order to
     //check of name conflict
 
-    // enable button when entered display name is valid
+    // enable display name button when entered name is valid
     document.querySelector('#txtinput_dispname').onkeyup = () => {
     // TODO: Ensure name contains 3 visible characters
         if (document.querySelector('#txtinput_dispname').value.length > 3)
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('#btn_dispname').disabled = true;
     };
 
+    //when then display name is submitted by the user
     document.querySelector('#frm_dispname').onsubmit = () => {
 
       //initialize new request
@@ -96,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Build list of channels from server
       build_channel_list();
+      build_chat_window();
 
   }); // end on connect
 
@@ -173,9 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // and then let server emit new channelt to all clients.
   document.querySelector('#btn_add_post').onclick = () => {
 
+        // assign data elements for post to Variables
+
+
         // emit new post to to server
-        document.querySelector('#txt_add_post').value = "";
         socket.emit('emit_post', post_ch, post_txt, post_user, post_time);
+        document.querySelector('#txt_add_post').value = "";
 
   } // end add channel on button click
 
@@ -269,9 +275,24 @@ function add_channel_card(ch_name, ch_owner) {
   card.setAttributeNode(card_attr2);
 
   const anchor = document.createElement('a');
-  var a_attr = document.createAttribute("href");
-  a_attr.value = "#" + ch_name;
-  anchor.setAttributeNode(a_attr);
+  var a_attr1 = document.createAttribute("href");
+  a_attr1.value = "";
+  anchor.setAttributeNode(a_attr1);
+  var a_attr2 = document.createAttribute("data-channel");
+  a_attr2.value = ch_name;
+  anchor.setAttributeNode(a_attr2);
+  var a_attr3 = document.createAttribute("class");
+  a_attr3.value = "ch_link";
+  anchor.setAttributeNode(a_attr3);
+
+  anchor.onclick = () => {
+      const sel_channel = anchor.dataset.channel;
+      // what to do when clicked
+      localStorage.setItem('active_channel', sel_channel);
+      build_chat_window();
+      return false;
+  };
+
 
   const card_head = document.createElement('div');
   var card_head_attr = document.createAttribute("class");
@@ -307,10 +328,21 @@ function add_channel_card(ch_name, ch_owner) {
   anchor.appendChild(card_body);
   card.appendChild(anchor);
   row.appendChild(card);
+
+
+
   document.querySelector('#channel_listing').appendChild(row);
 
-
 } // end build_channel_card()
+
+// gets the active channel from local storage
+// sets the chat window to that channel
+function build_chat_window(){
+
+  active_channel = localStorage.getItem('active_channel');
+  document.querySelector('#chat_header1').innerHTML = active_channel;
+
+}
 
 
 // var h1 = document.getElementsByTagName("H1")[0];   // Get the first <h1> element in the document
