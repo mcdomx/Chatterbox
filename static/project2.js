@@ -1,23 +1,10 @@
 
 
 // ########################  begin setup local storage ########################
-// localStorage.clear();
 
 // Get localStorage item for display name -- setup if none exists
 if ( !localStorage.getItem('display_name') )
     localStorage.setItem('display_name', "null");
-
-// DEVELOPMENT: set dislpay_name localStorage item to null
-// localStorage.setItem('display_name', "null")
-
-
-// Get localStorage item for channels and chats -- setup if none exists
-// TODO: do i need this?
-// if (!localStorage.getItem('channels')) {
-//     localStorage.setItem('channels', "null");
-//   }
-
-// Assign values to global Variables
 
 // Get the last active channel viewed - create localStorage item if none
 // 'active_channel' holds the channel currently being viewed
@@ -124,13 +111,24 @@ function show_body_block(socket) {
 
   // When a new channel is announed by the server, add it to the channel list
   socket.on('add_new_channel', new_ch => {
-      add_channel_card(new_ch.ch_name, new_ch.ch_owner);
+
+      add_channel_card(new_ch.name, new_ch);
   });
 
   // When a post is announed by the server, add it to the channel list
   socket.on('add_new_post', new_post => {
+    // If post is to active channel update the window
+
+    if (localStorage.getItem('active_channel') == new_post.ch_name) {
       add_post_to_window(new_post);
-  });
+    } else {
+    // If post is to non-active channel update the card
+
+    // set the inner html of the data-posts == new_post.ch_name to new.post.num_posts
+
+    }
+
+  }); // end add_new_post on socket
 
   set_body_block_elements(socket);
   document.querySelector('#register_block').hidden = true;
@@ -138,6 +136,7 @@ function show_body_block(socket) {
   document.querySelector('#body_block').hidden = false;
   document.querySelector('#txt_dispname').innerHTML =
                         `Display Name: ${localStorage.getItem('display_name')}`;
+
 }; // end show_body_block()
 
 
@@ -155,11 +154,12 @@ function build_channel_list() {
 
     // for each channel in the list, add a channel card
     for (channel in channel_list) {
-      add_channel_card(channel, channel_list[channel]['ch_owner'])
+      add_channel_card(channel, channel_list[channel])
     }
   } // end onload
 
   get_channels.send();
+
 } // end build_channel_list()
 
 
@@ -196,6 +196,8 @@ function load_chat() {
 function add_post_to_window(post) {
   //append post to chat listing  id="chat_listing"
 
+  // if the post is to the active window - update WINDOW
+  // otherwise, update the channel card # of posts and last post time
   const post_div = document.createElement('div');
 
   // if post is from owner, put on the right side
@@ -260,7 +262,7 @@ function setup_add_channel(socket) {
       } else {
         // emit new channel to to server
         document.querySelector('#txt_add_channel').value = "";
-        socket.emit('emit_channel', new_ch);
+        socket.emit('new_channel', new_ch);
       }
 
     } // end onload
@@ -293,6 +295,7 @@ function setup_add_post(socket) {
     // emit new post to to server
     socket.emit('add_post', post_ch, post_txt, post_user, post_time);
     document.querySelector('#txt_add_post').value = "";
+
   } // end add channel on button click
 
 } // end setup_add_post()
@@ -313,7 +316,6 @@ function load_posts(active_channel) {
     get_chat.onload = () => {
       //extract JSON data from request
       const response = JSON.parse(get_chat.responseText);
-
 
       console.log(response);
       if (response.error) {
@@ -339,7 +341,7 @@ function load_posts(active_channel) {
 
 
 // add HTML for channel card to left side column
-function add_channel_card(ch_name, ch_owner) {
+function add_channel_card(ch_name, ch_data) {
 
   const row = document.createElement('div');
   row.className = "row mx-auto";
@@ -395,13 +397,23 @@ function add_channel_card(ch_name, ch_owner) {
 
   // ASSIGN CONTENT TO TAGS
   const p_owner = document.createElement('p');
-  p_owner.innerHTML = "Owner: " + ch_owner;
+  p_owner.innerHTML = "Owner: " + ch_data.owner;
 
   const p_numposts = document.createElement('p');
   p_numposts.innerHTML = "# of posts: ";
+  const s_numposts = document.createElement('span');
+  s_numposts.id = ch_name+"numposts";
+  p_numposts.appendChild(s_numposts);
+  s_numposts.innerHTML = ch_data.num_posts;
+
 
   const p_lastpost = document.createElement('p');
   p_lastpost.innerHTML = "Last Post: ";
+  const s_lastpost = document.createElement('span');
+  s_lastpost.id = ch_name+"lastpost";
+  p_lastpost.appendChild(s_lastpost);
+  s_lastpost.innerHTML = ch_data.last_post;
+
 
   card_text.appendChild(p_owner);
   card_text.appendChild(p_numposts);

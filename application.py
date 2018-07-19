@@ -43,6 +43,7 @@ class Channel:
         self.all_posts.append(post)
         if len(self.all_posts) > Channel.max_posts:
             self.all_posts.pop[0]
+        # emit the number of posts and the time of the last post
 
     def get_posts(self):
         return self.all_posts
@@ -53,24 +54,26 @@ class Channel:
     def get_channels():
         return Channel.channels
 
+    def get_numposts(ch_name):
+        return len(Channel.channels[ch_name].all_posts)
+
     def jsonify_channels():
-        channel_dict = {}
+        ch_dict = {}
         # TODO: If no channels exist - give appropriate reponse
 
         for ch_name, ch_obj in Channel.get_channels().items():
             if ch_name == None:
                 continue
-            channel_dict[ch_name] = {'owner': ch_obj.owner, 'last_post': ch_obj.last_post}
+            ch_dict[ch_name] = {'owner': ch_obj.owner, 'last_post': ch_obj.last_post, 'num_posts': Channel.get_numposts(ch_name)}
 
-
-        return jsonify(channel_dict)
+        return jsonify(ch_dict)
 
     def jsonify_posts(ch_name):
         all_posts = Channel.get_channel(ch_name).get_posts()
         post_dict = [] # this will be an ordered list of dictiorary objects
 
         for post in all_posts:
-            post_dict.append(Post.get_post_dict(post))
+            post_dict.append(Post.get_post_dict(post, ch_name))
 
         return jsonify(post_dict)
 
@@ -79,8 +82,10 @@ class Channel:
     def emit_channel(ch_name):
         ch_dict = {}
         ch = Channel.get_channel(ch_name)
-        ch_dict = {"ch_name": ch.name, "ch_owner": ch.owner, "last_post": ch.last_post}
+        ch_dict = {'name': ch_name, 'owner': ch.owner, 'last_post': ch.last_post, 'num_posts': Channel.get_numposts(ch_name)}
         emit("add_new_channel", ch_dict, broadcast=True)
+
+
 
     # return True if channel name already exists; False if name does not exist
     def exists(ch_name):
@@ -100,8 +105,8 @@ class Post():
         channel = Channel.get_channel(post_ch)
         channel.add_post(self)
 
-    def get_post_dict(self):
-        return {"txt": self.txt, "user": self.user, "time": self.time}
+    def get_post_dict(self, ch_name):
+        return {"ch_name": ch_name, "txt": self.txt, "user": self.user, "time": self.time, "num_posts": Channel.get_numposts(ch_name)}
 
 
 
@@ -161,6 +166,7 @@ post5 = Post(ch2.name, "Please stop making staements you know nothing about!", "
 
 # END TESTING AND DEVELOPMENT
 
+# add_new_channel and get_channels have to return the same thing
 
 
 @app.route("/")
@@ -184,8 +190,8 @@ def add_newname():
 
 
 # emit new channel
-@socketio.on("emit_channel")
-def emit_channel(ch_name):
+@socketio.on("new_channel")
+def new_channel(ch_name):
     Channel.emit_channel(ch_name);
 
 
@@ -193,7 +199,7 @@ def emit_channel(ch_name):
 @socketio.on("add_post")
 def add_post(post_ch, post_txt, post_user, post_time):
     new_post = Post(post_ch, post_txt, post_user, post_time);
-    emit("add_new_post", new_post.get_post_dict(), broadcast=True);
+    emit("add_new_post", new_post.get_post_dict(post_ch), broadcast=True);
 
 
 # add new channel -- this will not emit it
