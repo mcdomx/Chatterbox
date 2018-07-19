@@ -28,57 +28,82 @@ class Channel:
 
     # TODO: Create a list that holds all the channel objects
     # TODO: try to eliminate the use of all_channel and user channel_list instead
-    channel_list = {} # dict{"ch_name": ch_object}
-    
+    channels = {} # dict{"ch_name": ch_object}
+
     def __init__(self, name, owner):
         self.name = name
         self.owner = owner
         self.last_post = 0
         # add new channel to list of channels
         self.__class__.all_channels[self.name] = {'ch_owner': self.owner, 'last_post': 0}
-        channel_list.append = {self.name, self}
-        all_posts = []  # instanace variable to hold ordered list of post objects
-
+        Channel.channels[self.name] = self
+        self.all_posts = []  # instanace variable to hold ordered list of post objects
 
     def add_post(self, post):
         self.all_posts.append(post)
-        if self.all_posts.length > 100:
+        if len(self.all_posts) > Channel.max_posts:
             self.all_posts.pop[0]
 
+    def get_posts(self):
+        return self.all_posts
+
     def get_channel(ch_name):
-        return channel_list[ch_name]
+        return Channel.channels[ch_name]
+
+    def get_channels():
+        return Channel.channels
 
     def jsonify_channels():
         channel_dict = {}
         # TODO: If no channels exist - give appropriate reponse
-        for channel in Channel.all_channels:
-            channel_dict[channel] = Channel.all_channels[channel]
+
+        for ch_name, ch_obj in Channel.get_channels().items():
+            if ch_name == None:
+                continue
+            channel_dict[ch_name] = {'owner': ch_obj.owner, 'last_post': ch_obj.last_post}
+
+
         return jsonify(channel_dict)
+
+    def jsonify_posts(ch_name):
+        all_posts = Channel.get_channel(ch_name).get_posts()
+        post_dict = [] # this will be an ordered list of dictiorary objects
+
+        for post in all_posts:
+            post_dict.append(Post.get_post_dict(post))
+
+        return jsonify(post_dict)
+
 
     #create channel broadcast data and emit it
     def emit_channel(ch_name):
-        channel_dict = {}
-        channel_dict = {"ch_name": ch_name, "ch_owner": Channel.all_channels[ch_name]["ch_owner"], "last_post": Channel.all_channels[ch_name]["last_post"]}
-        emit("add_new_channel", channel_dict, broadcast=True)
+        ch_dict = {}
+        ch = Channel.get_channel(ch_name)
+        ch_dict = {"ch_name": ch.name, "ch_owner": ch.owner, "last_post": ch.last_post}
+        emit("add_new_channel", ch_dict, broadcast=True)
 
     # return True if channel name already exists; False if name does not exist
-    def exists(channel_name):
-        if channel_name in Channel.all_channels:
+    def exists(ch_name):
+        if ch_name in Channel.all_channels:
             return True
         else:
             return False
 
 
 class Post():
-    def __init__(self, post_ch, post_txt, post_user, post_time):
-        self.ch = post_ch
-        self.txt = post_txt
-        self.user = post_user
-        self.time = post_time
+    def __init__(self, post_ch, txt, user, time):
+        self.txt = txt
+        self.user = user
+        self.time = time
 
         # get the channel that the post will be added to
-        active_channel = get_channel(post_ch)
-        active_channel.add_post(self)
+        channel = Channel.get_channel(post_ch)
+        channel.add_post(self)
+
+    def get_post_dict(self):
+        return {"txt": self.txt, "user": self.user, "time": self.time}
+
+
 
 
 
@@ -105,12 +130,35 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
 Session(app)
 
-# list of all channels
-channel_list = ['general']
 
+# TODO: ERASE THIS BEFORE SUBMISSION
 # TESTING AND DEVELOPMENT
 Channel("cycling", "Mark")
 Channel("bed bugs", "Cindy")
+ch1 = Channel.get_channel("cycling")
+ch2 = Channel.get_channel("bed bugs")
+
+post1 = Post(ch1.name, "This is my first post!", "Gerald", 0)
+post2 = Post(ch1.name, "This is crazy stuff!", "Betty", 0)
+post3 = Post(ch1.name, "Did you know the sky was blue?", "Gerald", 0)
+post4 = Post(ch1.name, "Blue!  I've never left the basement since I was a small child.", "Dizzy", 0)
+
+post1 = Post(ch2.name, "My legs are itching.", "Sparky", 0)
+post2 = Post(ch2.name, "Do you have alergies?", "Jenny", 0)
+post3 = Post(ch2.name, "Spider bites?", "Gerald", 0)
+post4 = Post(ch2.name, "I am an expert on itchy legs.  You have bed bugs!", "Dr. No", 0)
+post5 = Post(ch2.name, "Please stop making staements you know nothing about!", "Dr. No", 0)
+
+
+# for ch_name, ch_obj in Channel.get_channels().items():
+#     print(f"Channel: {ch_name}")
+#     print(f"    Posts:")
+#     for post in ch_obj.get_posts():
+#         print(f"        User: {post.user}   Msg: {post.txt}")
+
+
+
+
 # END TESTING AND DEVELOPMENT
 
 
@@ -141,6 +189,12 @@ def emit_channel(ch_name):
     Channel.emit_channel(ch_name);
 
 
+# emit new channel
+@socketio.on("add_post")
+def add_post(post_ch, post_txt, post_user, post_time):
+    new_post = Post(post_ch, post_txt, post_user, post_time);
+    emit("add_new_post", new_post.get_post_dict(), broadcast=True);
+
 
 # add new channel -- this will not emit it
 # adding channel as soon as it is confirmed will avoid
@@ -158,6 +212,18 @@ def add_channel():
         owner =  request.form.get("ch_owner")
         new_channel = Channel(ch_name, owner) # create new channel object
         return jsonify({"success": True})
+
+
+@app.route("/get_posts", methods=["POST"])
+def add_posts():
+
+    ch_name = request.form.get("ch_name")
+
+    if Channel.exists(ch_name):
+        return Channel.jsonify_posts(ch_name)
+    else:
+        return jsonify({"error": True})
+
 
 
 @app.route("/get_channels")
