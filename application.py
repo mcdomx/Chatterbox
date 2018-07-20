@@ -1,5 +1,5 @@
 import os
-import datetime
+import time
 import requests, json
 
 from flask import Flask, session, jsonify, render_template, request
@@ -42,6 +42,7 @@ class Channel:
 
     def add_post(self, post):
         self.all_posts.append(post)
+        self.last_post = post.time
         if len(self.all_posts) > Channel.max_posts:
             self.all_posts.pop[0]
         # emit the number of posts and the time of the last post
@@ -92,6 +93,10 @@ class Channel:
             return True
         else:
             return False
+
+    def get_lastpost_time(ch_name):
+        ch = get_channel(ch_name)
+        return ch.last_post
 
 
 class Post():

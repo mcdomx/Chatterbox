@@ -57,14 +57,15 @@
 
             <!-- ADD NEW CHANNEL INPUT BOX -->
             <div class="row">
-              <form id="frm_add_channel" class="mx-auto">
+              <div id="frm_add_channel" class="mx-auto">
                 <div class="input-group mb-3">
-                  <input type="text" id="txt_add_channel" class="form-control" placeholder="new channel name">
+
+                  <input type="text" id="txt_add_channel" class="form-control" placeholder="add channel name ...">
                   <div class="input-group-append">
                     <button type="button" id="btn_add_channel" class="btn btn-success">Add</button>
                   </div>
                 </div> <!-- END INPUT GROUP -->
-              </form>
+            </div> <!-- end form -->
             </div> <!-- END ROW -->
             <!-- END - ADD NEW CHANNEL INPUT BOX -->
 
@@ -84,12 +85,16 @@
             <div class="container mb-2 border-bottom">
               <div class="row mx-2 mt-4 mb-2">
                 <div id="chat_header1" class="col-5 rounded">
+                  <div>Channel:</div>
+                  <div id="header_chname"></div>
                 </div>
                 <div id="chat_header2" class="col-3 rounded mx-1">
-                AUX1
+                  <div>Posts:</div>
+                  <div id="header_posts"></div>
                 </div>
                 <div id="chat_header3" class="col-3 rounded">
-                AUX2
+                  <div>Last Post:</div>
+                  <div id="header_last"></div>
                 </div>
               </div>
             </div>
@@ -107,14 +112,14 @@
           <div class="row">
             <div class="col align-self-end">
               <!-- TODO: Does this need to be a form??? -->
-              <form id="frm_add_post">
+              <div id="frm_add_post">
                 <div class="input-group mb-3">
                   <input type="text" id="txt_add_post" class="form-control" placeholder="add message ... ">
                   <div class="input-group-append">
                     <button type="button" id="btn_add_post" class="btn btn-success">Post</button>
                   </div>
                 </div> <!-- END INPUT GROUP -->
-              </form>
+              </div> <!-- end form -->
 
           </div>
           <!-- END ROW FOR CHAT POST -->

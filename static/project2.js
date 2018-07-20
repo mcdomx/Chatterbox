@@ -55,7 +55,7 @@ function show_register_block(socket) {
           document.querySelector('#btn_dispname').disabled = false;
       else
           document.querySelector('#btn_dispname').disabled = true;
-  };
+  }
 
   //when then display name is submitted by the user
   document.querySelector('#frm_dispname').onsubmit = () => {
@@ -92,10 +92,13 @@ function show_register_block(socket) {
     name_exists.send(data);
     return false; // avoid sending the form and creating an HTTP POST request
 
-  } // end onsubmit frm_dispname
+  }; // end onsubmit frm_dispname
+} // end show_register_block
 
 
-};
+
+
+
 
 // show main window with event methods attached to elements
 function show_body_block(socket) {
@@ -111,22 +114,25 @@ function show_body_block(socket) {
 
   // When a new channel is announed by the server, add it to the channel list
   socket.on('add_new_channel', new_ch => {
-
       add_channel_card(new_ch.name, new_ch);
   });
 
   // When a post is announed by the server, add it to the channel list
   socket.on('add_new_post', new_post => {
-    // If post is to active channel update the window
 
+    // If post is to active channel update the window
     if (localStorage.getItem('active_channel') == new_post.ch_name) {
       add_post_to_window(new_post);
-    } else {
-    // If post is to non-active channel update the card
-
-    // set the inner html of the data-posts == new_post.ch_name to new.post.num_posts
-
     }
+
+    // update the channel card statisitics
+      cn = new_post.ch_name.replace(/ /g,"_");
+      document.querySelector('#'+cn+'numposts').innerHTML = new_post.num_posts;
+      document.querySelector('#'+cn+'lastpost').innerHTML = disp_time(new_post.time);
+
+
+
+
 
   }); // end add_new_post on socket
 
@@ -137,7 +143,7 @@ function show_body_block(socket) {
   document.querySelector('#txt_dispname').innerHTML =
                         `Display Name: ${localStorage.getItem('display_name')}`;
 
-}; // end show_body_block()
+} // end show_body_block()
 
 
 // on initial load of page, build the list of of channels stored on server
@@ -186,7 +192,7 @@ function load_chat() {
   load_posts(active_channel);
 
   // Set header items
-  document.querySelector('#chat_header1').innerHTML = active_channel;
+  document.querySelector('#header_chname').innerHTML = active_channel;
 
 } // end load_chat()
 
@@ -209,7 +215,19 @@ function add_post_to_window(post) {
 
   post_div.innerHTML = `${post.user}: ${post.txt}`;
 
+
   document.querySelector('#chat_listing').appendChild(post_div);
+  //TODO: scroll to bottom of window slowly to highlight new post
+  // document.querySelector('#chat_listing').scrollTop = document.querySelector('#chat_listing').scrollHeight
+  document.querySelector('#chat_listing').style.animationPlayState = 'running';
+
+
+
+  //update header elements in window
+  document.querySelector('#header_posts').innerHTML = post.num_posts;
+  document.querySelector('#header_last').innerHTML = disp_time(post.time);
+
+
 
 } // end add_post_to_window()
 
@@ -226,81 +244,107 @@ function set_body_block_elements(socket){
 
 
 function setup_add_channel(socket) {
-  // *****************  ADD CHANNEL
+
   document.querySelector('#btn_add_channel').disabled = true;
 
   // enable "add channel" button when entered display name is valid
-  document.querySelector('#txt_add_channel').onkeyup = () => {
+  document.querySelector('#txt_add_channel').onkeyup = (e) => {
   // TODO: Ensure name contains 3 visible characters
-      if (document.querySelector('#txt_add_channel').value.length > 3)
+      if (document.querySelector('#txt_add_channel').value.length > 2){
           document.querySelector('#btn_add_channel').disabled = false;
-      else
+          if (e.keyCode == 13) { add_channel(socket); };
+      } else {
           document.querySelector('#btn_add_channel').disabled = true;
+          if (e.keyCode == 13) { };
+
+      }
   };
 
   // first, check to see if channel name is in use.
   // If not in use, let server add channel to global list
   // and then let server emit new channelt to all clients.
   document.querySelector('#btn_add_channel').onclick = () => {
+    add_channel(socket);
+  }; // end add channel on button click
 
-    // determine if channel already exists
-    // initialize new request
-    const ch_exists = new XMLHttpRequest();
-    const new_ch = document.querySelector('#txt_add_channel').value;
-    ch_exists.open('POST', '/add_channel');
-
-    //when request is completed
-    ch_exists.onload = () => {
-
-      //extract JSON data from request
-      const response = JSON.parse(ch_exists.responseText)
-
-      //check existing channels for new channel name
-      if (!response["success"]) {
-        // name exists already - alert user - pick another name
-        alert(`Channel '${new_ch}' is already being used.  Try a differnet name.`);
-      } else {
-        // emit new channel to to server
-        document.querySelector('#txt_add_channel').value = "";
-        socket.emit('new_channel', new_ch);
-      }
-
-    } // end onload
-
-    // Add channel name and display name to request sent to server
-    const channel = new FormData();
-    channel.append('new_ch', new_ch);
-    channel.append('ch_owner', localStorage.getItem('display_name'))
-
-    // Send request
-    ch_exists.send(channel);
-    return false; // avoid sending the form and creating an HTTP POST request
-
-  } // end add channel on button click
-  // *****************  END ADD CHANNEL
-}
+}// ****  END setup_add_channel
 
 
+//will add channel to
+function add_channel(socket) {
+  // determine if channel already exists
+  // initialize new request
+  const ch_exists = new XMLHttpRequest();
+  const new_ch = document.querySelector('#txt_add_channel').value;
+  ch_exists.open('POST', '/add_channel');
+
+  //when request is completed
+  ch_exists.onload = () => {
+
+    //extract JSON data from request
+    const response = JSON.parse(ch_exists.responseText)
+
+    //check existing channels for new channel name
+    if (!response["success"]) {
+      // name exists already - alert user - pick another name
+      alert(`Channel '${new_ch}' is already being used.  Try a differnet name.`);
+    } else {
+      // emit new channel to to server
+      document.querySelector('#txt_add_channel').value = "";
+      document.querySelector('#btn_add_channel').disabled = true;
+      socket.emit('new_channel', new_ch);
+    }
+
+  } // end onload
+
+  // Add channel name and display name to request sent to server
+  const channel = new FormData();
+  channel.append('new_ch', new_ch);
+  channel.append('ch_owner', localStorage.getItem('display_name'))
+
+  // Send request
+  ch_exists.send(channel);
+  return false; // avoid sending the form and creating an HTTP POST request
+
+} // end add_channel()
 
 
 function setup_add_post(socket) {
 
+  document.querySelector('#btn_add_post').disabled = true;
+
+  // setup the txt box so that if empty can't submit
+  document.querySelector('#txt_add_post').onkeyup = (e) => {
+    if (document.querySelector('#txt_add_post').value.length > 0){
+        document.querySelector('#btn_add_post').disabled = false;
+        if (e.keyCode == 13) { add_post(socket); };
+    } else {
+        document.querySelector('#btn_add_post').disabled = true;
+        if (e.keyCode == 13) { };
+
+    }
+  }
+
+
   document.querySelector('#btn_add_post').onclick = () => {
-    // assign data elements for post to Variables
-    post_ch = localStorage.getItem('active_channel');
-    post_txt = document.querySelector('#txt_add_post').value;
-    post_user = localStorage.getItem('display_name');
-    post_time = Math.floor(Date.now() / 1000)
-
-    // emit new post to to server
-    socket.emit('add_post', post_ch, post_txt, post_user, post_time);
-    document.querySelector('#txt_add_post').value = "";
-
+    add_post(socket);
   } // end add channel on button click
 
 } // end setup_add_post()
 
+// will add post to the chat window and set appropriate screen elements
+function add_post(socket) {
+  // assign data elements for post to Variables
+  post_ch = localStorage.getItem('active_channel');
+  post_txt = document.querySelector('#txt_add_post').value;
+  post_user = localStorage.getItem('display_name');
+  post_time = (new Date).getTime();
 
+  // emit new post to to server
+  socket.emit('add_post', post_ch, post_txt, post_user, post_time);
+  document.querySelector('#btn_add_post').disabled = true;
+  document.querySelector('#txt_add_post').value = "";
+} // end add_post()
 
 
 // load posts for channel name sent as parameter
@@ -339,9 +383,23 @@ function load_posts(active_channel) {
 } // end load_posts()
 
 
+// convert epoch time to human readbale time for display
+function disp_time(epoch_time) {
+    t = new Date(epoch_time);
+    y = t.getFullYear().toString().slice(-2);
+    m = t.getMonth()+1;
+    d = t.getDate();
+    h = ("0" + (t.getHours()+1)).slice(-2);
+    mm = ("0" + (t.getMinutes()+1)).slice(-2);
+
+    return `${m}/${d}/${y} ${h}:${mm}`;
+}
 
 // add HTML for channel card to left side column
 function add_channel_card(ch_name, ch_data) {
+
+  //reaplce spaces in channel name for data-type elements
+  cn = ch_name.replace(/ /g,"_");
 
   const row = document.createElement('div');
   row.className = "row mx-auto";
@@ -400,20 +458,23 @@ function add_channel_card(ch_name, ch_data) {
   p_owner.innerHTML = "Owner: " + ch_data.owner;
 
   const p_numposts = document.createElement('p');
-  p_numposts.innerHTML = "# of posts: ";
+  p_numposts.innerHTML = "Posts: ";
   const s_numposts = document.createElement('span');
-  s_numposts.id = ch_name+"numposts";
+  s_numposts.id = cn+"numposts";
   p_numposts.appendChild(s_numposts);
   s_numposts.innerHTML = ch_data.num_posts;
 
 
   const p_lastpost = document.createElement('p');
-  p_lastpost.innerHTML = "Last Post: ";
+  p_lastpost.innerHTML = "Last: ";
   const s_lastpost = document.createElement('span');
-  s_lastpost.id = ch_name+"lastpost";
+  s_lastpost.id = cn+'lastpost';
+  if (ch_data.last_post == 0) {
+    s_lastpost.innerHTML = "no posts";
+  } else {
+    s_lastpost.innerHTML = disp_time(ch_data.last_post);
+  }
   p_lastpost.appendChild(s_lastpost);
-  s_lastpost.innerHTML = ch_data.last_post;
-
 
   card_text.appendChild(p_owner);
   card_text.appendChild(p_numposts);
