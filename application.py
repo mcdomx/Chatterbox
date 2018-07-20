@@ -21,13 +21,14 @@ class Display_names:
             return False
 
 
+# TODO: make some of these class methods functions
 class Channel:
 
     max_posts = 100;
+    # TODO: see if this can now be removed
     all_channels = {}  # class variable to hold dict of all channel names and owners
 
     # TODO: Create a list that holds all the channel objects
-    # TODO: try to eliminate the use of all_channel and user channel_list instead
     channels = {} # dict{"ch_name": ch_object}
 
     def __init__(self, name, owner):
@@ -59,7 +60,7 @@ class Channel:
 
     def jsonify_channels():
         ch_dict = {}
-        # TODO: If no channels exist - give appropriate reponse
+        # TODO: If no channels exist - give appropriate reponse -- or make a general channel
 
         for ch_name, ch_obj in Channel.get_channels().items():
             if ch_name == None:
@@ -77,14 +78,12 @@ class Channel:
 
         return jsonify(post_dict)
 
-
     #create channel broadcast data and emit it
     def emit_channel(ch_name):
         ch_dict = {}
         ch = Channel.get_channel(ch_name)
         ch_dict = {'name': ch_name, 'owner': ch.owner, 'last_post': ch.last_post, 'num_posts': Channel.get_numposts(ch_name)}
         emit("add_new_channel", ch_dict, broadcast=True)
-
 
 
     # return True if channel name already exists; False if name does not exist
@@ -135,7 +134,7 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
 Session(app)
 
-
+Channel("general", "chatterbox admin")
 # TODO: ERASE THIS BEFORE SUBMISSION
 # TESTING AND DEVELOPMENT
 Channel("cycling", "Mark")
@@ -143,16 +142,16 @@ Channel("bed bugs", "Cindy")
 ch1 = Channel.get_channel("cycling")
 ch2 = Channel.get_channel("bed bugs")
 
-post1 = Post(ch1.name, "This is my first post!", "Gerald", 0)
-post2 = Post(ch1.name, "This is crazy stuff!", "Betty", 0)
-post3 = Post(ch1.name, "Did you know the sky was blue?", "Gerald", 0)
-post4 = Post(ch1.name, "Blue!  I've never left the basement since I was a small child.", "Dizzy", 0)
+post1 = Post(ch1.name, "This is my first post!", "Gerald", 1532048464961)
+post2 = Post(ch1.name, "This is crazy stuff!", "Betty", 1532048464961)
+post3 = Post(ch1.name, "Did you know the sky was blue?", "Gerald", 1532048464961)
+post4 = Post(ch1.name, "Blue!  I've never left the basement since I was a small child.", "Dizzy", 1532048464961)
 
-post1 = Post(ch2.name, "My legs are itching.", "Sparky", 0)
-post2 = Post(ch2.name, "Do you have alergies?", "Jenny", 0)
-post3 = Post(ch2.name, "Spider bites?", "Gerald", 0)
-post4 = Post(ch2.name, "I am an expert on itchy legs.  You have bed bugs!", "Dr. No", 0)
-post5 = Post(ch2.name, "Please stop making staements you know nothing about!", "Dr. No", 0)
+post1 = Post(ch2.name, "My legs are itching.", "Sparky", 1532048464961)
+post2 = Post(ch2.name, "Do you have alergies?", "Jenny", 1532048464961)
+post3 = Post(ch2.name, "Spider bites?", "Gerald", 1532048464961)
+post4 = Post(ch2.name, "I am an expert on itchy legs.  You have bed bugs!", "Dr. No", 1532048464961)
+post5 = Post(ch2.name, "Please stop making staements you know nothing about!", "Dr. No", 1532048464961)
 
 
 # for ch_name, ch_obj in Channel.get_channels().items():
