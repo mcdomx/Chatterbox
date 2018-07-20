@@ -103,13 +103,15 @@ function show_register_block(socket) {
 // show main window with event methods attached to elements
 function show_body_block(socket) {
 
+  active_channel = localStorage.getItem('active_channel');
+
   // Build list of channels from server
   build_channel_list();
 
   if (localStorage.getItem('active_channel') == "null"){
     load_intro();
   } else {
-    load_chat(); // loads chat window for active channel
+    load_chat(active_channel); // loads chat window for active channel
   }
 
   // When a new channel is announed by the server, add it to the channel list
@@ -130,8 +132,12 @@ function show_body_block(socket) {
       document.querySelector('#'+cn+'numposts').innerHTML = new_post.num_posts;
       document.querySelector('#'+cn+'lastpost').innerHTML = disp_time(new_post.time);
 
+    //animate
 
-
+    document.querySelector(`#${cn}cardhead`).style.animationPlayState = 'running';
+    // document.querySelector(`#${cn}cardhead`).style.animation = '';
+    // reset_new_message_animation(document.querySelector(`#${cn}cardhead`));
+    // document.querySelector(`#${cn}cardhead`).style.animationPlayState = 'paused';
 
 
   }); // end add_new_post on socket
@@ -184,15 +190,15 @@ function load_intro() {
 
 
 //load the chat messages in chat window for active channel
-function load_chat() {
+function load_chat(channel) {
 
-  active_channel = localStorage.getItem('active_channel');
+
 
   //get channel's chat messages
-  load_posts(active_channel);
+  load_posts(channel);
 
   // Set header items
-  document.querySelector('#header_chname').innerHTML = active_channel;
+  document.querySelector('#header_chname').innerHTML = channel;
 
 } // end load_chat()
 
@@ -216,10 +222,12 @@ function add_post_to_window(post) {
   post_div.innerHTML = `${post.user}: ${post.txt}`;
 
 
+  cn = (post.ch_name).toString().replace(/ /g,"_");
+  console.log(cn);
+
   document.querySelector('#chat_listing').appendChild(post_div);
   //TODO: scroll to bottom of window slowly to highlight new post
-  // document.querySelector('#chat_listing').scrollTop = document.querySelector('#chat_listing').scrollHeight
-  document.querySelector('#chat_listing').style.animationPlayState = 'running';
+  document.querySelector('#chat_listing').scrollTop = document.querySelector('#chat_listing').scrollHeight
 
 
 
@@ -348,7 +356,7 @@ function add_post(socket) {
 
 
 // load posts for channel name sent as parameter
-function load_posts(active_channel) {
+function load_posts(channel) {
 
     // determine if channel already exists
     // initialize new request
@@ -373,11 +381,11 @@ function load_posts(active_channel) {
     }; // end onload
 
     // Add channel name and display name to request sent to server
-    const channel = new FormData();
-    channel.append('ch_name', active_channel);
+    const data = new FormData();
+    data.append('ch_name', channel);
 
     // Send request
-    get_chat.send(channel);
+    get_chat.send(data);
     return false; // avoid sending the form and creating an HTTP POST request
 
 } // end load_posts()
@@ -437,17 +445,36 @@ function add_channel_card(ch_name, ch_data) {
 
   const card_head = document.createElement('div');
   card_head.className = "card-header";
+  card_head.id = cn+"cardhead";
   // var card_head_attr = document.createAttribute("class");
   // card_head_attr.value = "card-header";
   // card_head.setAttributeNode(card_head_attr);
+  reset_new_message_animation(card_head);
+
+  card_head.addEventListener("animationend", (element) => {
+    reset_new_message_animation(element);
+    alert("ran reset");
+  });
+
+  // card_head.style.animation = "flash_badge 1s 1";
+  // card_head.style.animationPlayState = 'paused';
 
   card_head.innerHTML = ch_name
 
+  //add pill badge to card header
+  const counter = document.createElement('span');
+  counter.className = "badge badge-pill badge-danger ml-2";
+  counter.id = cn+"numposts";
+  card_head.appendChild(counter);
+  counter.innerHTML = ch_data.num_posts;
+
+  //channel card body
   const card_body = document.createElement('div');
   var card_body_attr = document.createAttribute("class");
   card_body_attr.value = "card-body pt-1 pb-2 px-3";
   card_body.setAttributeNode(card_body_attr);
 
+  //channel card text
   const card_text = document.createElement('p');
   var card_text_attr = document.createAttribute("class");
   card_text_attr.value = "card-text mx-0";
@@ -456,14 +483,6 @@ function add_channel_card(ch_name, ch_data) {
   // ASSIGN CONTENT TO TAGS
   const p_owner = document.createElement('p');
   p_owner.innerHTML = "Owner: " + ch_data.owner;
-
-  const p_numposts = document.createElement('p');
-  p_numposts.innerHTML = "Posts: ";
-  const s_numposts = document.createElement('span');
-  s_numposts.id = cn+"numposts";
-  p_numposts.appendChild(s_numposts);
-  s_numposts.innerHTML = ch_data.num_posts;
-
 
   const p_lastpost = document.createElement('p');
   p_lastpost.innerHTML = "Last: ";
@@ -477,7 +496,6 @@ function add_channel_card(ch_name, ch_data) {
   p_lastpost.appendChild(s_lastpost);
 
   card_text.appendChild(p_owner);
-  card_text.appendChild(p_numposts);
   card_text.appendChild(p_lastpost);
   card_body.appendChild(card_text);
   anchor.appendChild(card_head);
@@ -488,5 +506,15 @@ function add_channel_card(ch_name, ch_data) {
   document.querySelector('#channel_listing').appendChild(row);
 
 } // end build_channel_card()
+
+function reset_new_message_animation (element) {
+  console.log(element);
+  //cn = ch.replace(/ /g,"_");
+  // element.style.animation = "null";
+  //element = document.querySelector(`#${cn}element`).style;
+  console.log(element);
+  element.animation = "flash_badge 1s ease 1";
+  element.animationPlayState = 'paused';
+}
 
 // ######################## END SUPPORTING FUNCTIONS ########################

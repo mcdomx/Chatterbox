@@ -67,6 +67,9 @@ p {
   font-weight: 900;
   color: white;
   background-color: darkblue;
+
+
+
 }
 
 //Creates margins between specifc form elements
@@ -146,6 +149,32 @@ input[type=text]{
   animation-fill-mode: forwards;
   animation-iteration-count: 1;
 }
+
+@keyframes flash_badge {
+    0% {
+      background-color: darkblue;
+    }
+    50% {
+      background-color: yellow;
+    }
+    100% {
+      background-color: darkblue;
+    }
+
+
+} // end flash_badge
+
+// selects div that end with 'numposts'
+// intended to target the pill basges for channel cards
+// div[id$='cardhead'] {
+//       // position: relative;
+//       animation-name: flash_badge;
+//       animation-duration: .75s;
+//       // animation-fill-mode: forwards;
+//       animation-iteration-count: 1;
+// }
+
+// style="animation-name: flash_badge; animation-duration: .75s; animation-iteration-count: 1;"
 
 // h1 {
 //     position: relative;

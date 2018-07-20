@@ -109,4 +109,16 @@ input[type=text] {
   animation-iteration-count: 1;
 }
 
+@keyframes flash_badge {
+  0% {
+    background-color: darkblue;
+  }
+  50% {
+    background-color: yellow;
+  }
+  100% {
+    background-color: darkblue;
+  }
+}
+
 /*# sourceMappingURL=CSS_project2.css.map */
