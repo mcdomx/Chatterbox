@@ -98,8 +98,6 @@ function show_register_block(socket) {
 
 
 
-
-
 // show main window with event methods attached to elements
 function show_body_block(socket) {
 
@@ -109,38 +107,46 @@ function show_body_block(socket) {
   build_channel_list();
 
   if (localStorage.getItem('active_channel') == "null"){
+    //no previously selected channel - show welcome message
     load_intro();
   } else {
-    load_chat(active_channel); // loads chat window for active channel
+    change_channel(active_channel);
   }
 
   // When a new channel is announed by the server, add it to the channel list
   socket.on('add_new_channel', new_ch => {
       add_channel_card(new_ch.name, new_ch);
+
+      //if the new channel was created by the user
+      //then switch to that channel
+      if (new_ch.owner == localStorage.getItem('display_name')) {
+        change_channel(new_ch.name);
+      }
+
   });
 
   // When a post is announed by the server, add it to the channel list
   socket.on('add_new_post', new_post => {
 
+    cn = new_post.ch_name;
+
     // If post is to active channel update the window
-    if (localStorage.getItem('active_channel') == new_post.ch_name) {
+    if (localStorage.getItem('active_channel') == cn) {
       add_post_to_window(new_post);
     }
 
     // update the channel card statisitics
-      cn = new_post.ch_name.replace(/ /g,"_");
-      document.querySelector('#'+cn+'numposts').innerHTML = new_post.num_posts;
-      document.querySelector('#'+cn+'lastpost').innerHTML = disp_time(new_post.time);
+    document.querySelector('#'+cn+'numposts').innerHTML = new_post.num_posts;
+    document.querySelector('#'+cn+'lastpost').innerHTML = disp_time(new_post.time);
 
-    //animate
-
-    document.querySelector(`#${cn}cardhead`).style.animationPlayState = 'running';
-    // document.querySelector(`#${cn}cardhead`).style.animation = '';
-    // reset_new_message_animation(document.querySelector(`#${cn}cardhead`));
-    // document.querySelector(`#${cn}cardhead`).style.animationPlayState = 'paused';
-
+    //Start channel card animation by adding animation id to element
+    //When animation is done, the 'animationend' event will trigger which
+    //will remove the animation id and allow a subsequent trigger of the animation
+    document.querySelector(`[data-channel=${cn}]`).childNodes[0].setAttribute("id", `${cn}cardanimation`)
+    document.querySelector(`#${cn}cardanimation`).style.animationPlayState = 'running';
 
   }); // end add_new_post on socket
+
 
   set_body_block_elements(socket);
   document.querySelector('#register_block').hidden = true;
@@ -175,9 +181,6 @@ function build_channel_list() {
 } // end build_channel_list()
 
 
-
-
-
 //load intro screen if no channel has been selected
 function load_intro() {
   const intro = document.createElement('div');
@@ -188,54 +191,33 @@ function load_intro() {
 
 
 
-
-//load the chat messages in chat window for active channel
-function load_chat(channel) {
-
-
-
-  //get channel's chat messages
-  load_posts(channel);
-
-  // Set header items
-  document.querySelector('#header_chname').innerHTML = channel;
-
-} // end load_chat()
-
-
-
-
+// append a new post to the current #chat_listing window
 function add_post_to_window(post) {
-  //append post to chat listing  id="chat_listing"
 
-  // if the post is to the active window - update WINDOW
-  // otherwise, update the channel card # of posts and last post time
   const post_div = document.createElement('div');
+  const chat_listing = document.querySelector('#chat_listing');
 
-  // if post is from owner, put on the right side
+
   if (post.user === localStorage.getItem('display_name')) {
+    // if post is from owner, put on the right side
     post_div.className = "col-8 offset-4  rounded mb-2 py-1 self_chatbox";
   } else {
+    // put on left side
     post_div.className = "col-8           rounded mb-2 py-1 other_chatbox";
   } // end if-else
 
+  //post text for display
   post_div.innerHTML = `${post.user}: ${post.txt}`;
 
-
-  cn = (post.ch_name).toString().replace(/ /g,"_");
-  console.log(cn);
-
-  document.querySelector('#chat_listing').appendChild(post_div);
+  //add the newly created posting to the chat listing
+  chat_listing.appendChild(post_div);
   //TODO: scroll to bottom of window slowly to highlight new post
-  document.querySelector('#chat_listing').scrollTop = document.querySelector('#chat_listing').scrollHeight
-
-
+  //scroll to the bottom of the list to show new post
+  chat_listing.scrollTop = chat_listing.scrollHeight
 
   //update header elements in window
   document.querySelector('#header_posts').innerHTML = post.num_posts;
   document.querySelector('#header_last').innerHTML = disp_time(post.time);
-
-
 
 } // end add_post_to_window()
 
@@ -243,34 +225,48 @@ function add_post_to_window(post) {
 
 // set properties of body_block elements
 function set_body_block_elements(socket){
-
   setup_add_channel(socket);
   setup_add_post(socket);
-
 } // end set_body_block_elements()
 
 
 
 function setup_add_channel(socket) {
 
-  document.querySelector('#btn_add_channel').disabled = true;
+  //assign variables to elements for readability
+  btn = document.querySelector('#btn_add_channel');
+  txtbox = document.querySelector('#txt_add_channel');
+
+  btn.disabled = true;  //start with disabled add button
 
   // enable "add channel" button when entered display name is valid
-  document.querySelector('#txt_add_channel').onkeyup = (e) => {
-  // TODO: Ensure name contains 3 visible characters
-      if (document.querySelector('#txt_add_channel').value.length > 2){
-          document.querySelector('#btn_add_channel').disabled = false;
-          if (e.keyCode == 13) { add_channel(socket); };
-      } else {
-          document.querySelector('#btn_add_channel').disabled = true;
-          if (e.keyCode == 13) { };
-
+  // channel names can't start with a number of be longer than 12 characters
+  txtbox.onkeyup = (e) => {
+    // TODO: Ensure name contains 3 visible characters
+    if (txtbox.value.length > 12) {
+      //limit channel name to 12 characters
+      txtbox.value = txtbox.value.slice(0, -1);
+    }
+    else if (txtbox.value.length == 1){
+      //test first charcter in channel name for a digit
+      if (txtbox.value >=0 || txtbox.value <=9) {
+        txtbox.value = txtbox.value.slice(0, 0);
       }
+    }
+    else if (txtbox.value.length > 2){
+      //enable add button if 3 character minimum is reached
+      btn.disabled = false;
+      if (e.keyCode == 13) { add_channel(socket); };
+    }
+    else {
+      //otherewise disable the add button
+      btn.disabled = true;
+      if (e.keyCode == 13) { };
+    }
   };
 
-  // first, check to see if channel name is in use.
-  // If not in use, let server add channel to global list
-  // and then let server emit new channelt to all clients.
+  // add channel to server upon click
+  // server will emit new channel when created
   document.querySelector('#btn_add_channel').onclick = () => {
     add_channel(socket);
   }; // end add channel on button click
@@ -278,12 +274,17 @@ function setup_add_channel(socket) {
 }// ****  END setup_add_channel
 
 
-//will add channel to
+// will add a channel to the server based on text in txt_add_channel box
+// when server creates channel, it will emit the new channel
 function add_channel(socket) {
-  // determine if channel already exists
+
   // initialize new request
   const ch_exists = new XMLHttpRequest();
-  const new_ch = document.querySelector('#txt_add_channel').value;
+  const new_ch = document.querySelector('#txt_add_channel').value.toString();
+
+  //replace spaces with _
+  cn = new_ch.replace(/ /g,"_").toString();
+
   ch_exists.open('POST', '/add_channel');
 
   //when request is completed
@@ -300,14 +301,14 @@ function add_channel(socket) {
       // emit new channel to to server
       document.querySelector('#txt_add_channel').value = "";
       document.querySelector('#btn_add_channel').disabled = true;
-      socket.emit('new_channel', new_ch);
+      socket.emit('new_channel', cn);
     }
 
   } // end onload
 
   // Add channel name and display name to request sent to server
   const channel = new FormData();
-  channel.append('new_ch', new_ch);
+  channel.append('new_ch', cn);
   channel.append('ch_owner', localStorage.getItem('display_name'))
 
   // Send request
@@ -329,7 +330,6 @@ function setup_add_post(socket) {
     } else {
         document.querySelector('#btn_add_post').disabled = true;
         if (e.keyCode == 13) { };
-
     }
   }
 
@@ -350,10 +350,18 @@ function add_post(socket) {
 
   // emit new post to to server
   socket.emit('add_post', post_ch, post_txt, post_user, post_time);
+  console.log(`emitting to channel: ${post_ch}`);
   document.querySelector('#btn_add_post').disabled = true;
   document.querySelector('#txt_add_post').value = "";
 } // end add_post()
 
+function clear_posts(channel) {
+  chat_window = document.querySelector('#chat_listing');
+  while (chat_window.firstChild) {
+    chat_window.removeChild(chat_window.firstChild);
+  }
+
+} // end clear_posts()
 
 // load posts for channel name sent as parameter
 function load_posts(channel) {
@@ -369,7 +377,6 @@ function load_posts(channel) {
       //extract JSON data from request
       const response = JSON.parse(get_chat.responseText);
 
-      console.log(response);
       if (response.error) {
         load_intro();
       } else {
@@ -378,6 +385,12 @@ function load_posts(channel) {
           add_post_to_window(response[post]);
         } // end for loop
       }
+
+      //remove the underscore for display
+      ch_name_display = channel.replace(/_/g," ");
+      // dislay the newly selected channel's name in the header
+      document.querySelector('#header_chname').innerHTML = ch_name_display;
+
     }; // end onload
 
     // Add channel name and display name to request sent to server
@@ -403,22 +416,36 @@ function disp_time(epoch_time) {
     return `${m}/${d}/${y} ${h}:${mm}`;
 }
 
+function change_channel(channel) {
+
+  //clear previous channel's posts from window
+  clear_posts(channel);
+
+  //clear header elements in window
+  document.querySelector('#header_posts').innerHTML = 0;
+  document.querySelector('#header_last').innerHTML = '-';
+
+  //load new channel's chat messages from server to client window
+  load_posts(channel);
+
+  //change localStorage
+  localStorage.setItem('active_channel', channel);
+
+}
+
 // add HTML for channel card to left side column
 function add_channel_card(ch_name, ch_data) {
 
-  //reaplce spaces in channel name for data-type elements
-  cn = ch_name.replace(/ /g,"_");
+  //reaplce spaces in channel name for display purposes
+  ch_name_display = ch_name.replace(/_/g," ");
 
+  //row setup
   const row = document.createElement('div');
   row.className = "row mx-auto";
 
-
+  //channel card setup
   const card = document.createElement('div');
-
   card.className = "card text-white bg-primary my-1 mx-auto"
-  // var card_attr1 = document.createAttribute("class");
-  // card_attr1.value = "card text-white bg-primary my-1 mx-auto";
-  // card.setAttributeNode(card_attr1);
 
   var card_attr2 = document.createAttribute("style")
   card_attr2.value = "min-width: 14rem";
@@ -437,34 +464,23 @@ function add_channel_card(ch_name, ch_data) {
 
   anchor.onclick = () => {
       const sel_channel = anchor.dataset.channel;
-      // what to do when clicked
-      localStorage.setItem('active_channel', sel_channel);
-      build_chat_window();
+      change_channel(sel_channel);
       return false;
   };
 
   const card_head = document.createElement('div');
   card_head.className = "card-header";
-  card_head.id = cn+"cardhead";
-  // var card_head_attr = document.createAttribute("class");
-  // card_head_attr.value = "card-header";
-  // card_head.setAttributeNode(card_head_attr);
-  reset_new_message_animation(card_head);
 
   card_head.addEventListener("animationend", (element) => {
     reset_new_message_animation(element);
-    alert("ran reset");
   });
 
-  // card_head.style.animation = "flash_badge 1s 1";
-  // card_head.style.animationPlayState = 'paused';
-
-  card_head.innerHTML = ch_name
+  card_head.innerHTML = ch_name_display;
 
   //add pill badge to card header
   const counter = document.createElement('span');
   counter.className = "badge badge-pill badge-danger ml-2";
-  counter.id = cn+"numposts";
+  counter.id = ch_name+"numposts";
   card_head.appendChild(counter);
   counter.innerHTML = ch_data.num_posts;
 
@@ -487,7 +503,7 @@ function add_channel_card(ch_name, ch_data) {
   const p_lastpost = document.createElement('p');
   p_lastpost.innerHTML = "Last: ";
   const s_lastpost = document.createElement('span');
-  s_lastpost.id = cn+'lastpost';
+  s_lastpost.id = ch_name+'lastpost';
   if (ch_data.last_post == 0) {
     s_lastpost.innerHTML = "no posts";
   } else {
@@ -507,14 +523,24 @@ function add_channel_card(ch_name, ch_data) {
 
 } // end build_channel_card()
 
-function reset_new_message_animation (element) {
-  console.log(element);
-  //cn = ch.replace(/ /g,"_");
-  // element.style.animation = "null";
-  //element = document.querySelector(`#${cn}element`).style;
-  console.log(element);
-  element.animation = "flash_badge 1s ease 1";
-  element.animationPlayState = 'paused';
+
+//removes id from the card header
+//the id contains the css for animation
+//id will be readded when the next animation is supposed to happen
+//this process allows an animation to be re-triggered several times on demand
+function reset_new_message_animation (animation) {
+  ch_name = animation.srcElement.firstChild.data;
+  ch_name_display = ch_name.replace(/ /g,"_");
+
+  element = document.querySelector(`[data-channel=${ch_name_display}]`).childNodes[0];
+  element.removeAttribute("id");
+
 }
+
+//https://css-tricks.com/controlling-css-animations-transitions-javascript/
+// make the transition as a class and add that class to class
+// after running an automation, remove the class from the element and then readd it
+// https://css-tricks.com/restart-css-animation/
+
 
 // ######################## END SUPPORTING FUNCTIONS ########################

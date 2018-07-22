@@ -143,9 +143,9 @@ Channel("general", "chatterbox admin")
 # TODO: ERASE THIS BEFORE SUBMISSION
 # TESTING AND DEVELOPMENT
 Channel("cycling", "Mark")
-Channel("bed bugs", "Cindy")
+Channel("bed_bugs", "Cindy")
 ch1 = Channel.get_channel("cycling")
-ch2 = Channel.get_channel("bed bugs")
+ch2 = Channel.get_channel("bed_bugs")
 
 post1 = Post(ch1.name, "This is my first post!", "Gerald", 1532048464961)
 post2 = Post(ch1.name, "This is crazy stuff!", "Betty", 1532048464961)

@@ -63,13 +63,12 @@ p {
 }
 
 .card-header {
-  font-size: 120%;
+  font-size: 110%;
   font-weight: 900;
+  padding: 7px;
+  padding-left: 10px;
   color: white;
   background-color: darkblue;
-
-
-
 }
 
 //Creates margins between specifc form elements
@@ -134,21 +133,19 @@ input[type=text]{
 @keyframes scroll_posts {
     0% {
         scrollTop: 0;
-        color: red;
     }
     100% {
         scrollTop: 2000;
-        color: blue;
     }
 }
 
-#header_posts {
-  position: realtive;
-  animation-name: scroll_posts;
-  animation-duration: 2s;
-  animation-fill-mode: forwards;
-  animation-iteration-count: 1;
-}
+// #header_posts {
+//   position: realtive;
+//   animation-name: scroll_posts;
+//   animation-duration: 2s;
+//   animation-fill-mode: forwards;
+//   animation-iteration-count: 1;
+// }
 
 @keyframes flash_badge {
     0% {
@@ -160,9 +157,12 @@ input[type=text]{
     100% {
       background-color: darkblue;
     }
-
-
 } // end flash_badge
+
+div[id$='cardanimation'] {
+    animation: flash_badge 1s ease 1;
+    animation-play-state: paused;
+}
 
 // selects div that end with 'numposts'
 // intended to target the pill basges for channel cards
