@@ -12,6 +12,13 @@ New posts adjust the chat window so the newest post is always displayed at the b
 
 The user can change a channel by clicking the respective channel card in the left column.  
 
+As a personal touch, I added some helpful animations:
+- newly added channels slide into place at the top of the channel listing
+- the active channel pulses mildly in the channel listing
+- new messages received by any channel cause the channel card to flash briefly
+- new messages on the active channel fade in a flash briefly to highlight their arrival
+
+
 
 ## Data Structures
 ### Client-side

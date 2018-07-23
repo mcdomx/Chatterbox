@@ -11,6 +11,8 @@ if ( !localStorage.getItem('display_name') )
 if (!localStorage.getItem('active_channel')) {
     localStorage.setItem('active_channel', "null");
   }
+
+
 // ########################  end setup local storage ########################
 
 
@@ -37,11 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ########################  end DOMContentLoaded ########################
 
 
-
-
-
 // ######################## BEGIN SUPPORTING FUNCTIONS ########################
-
 
 // display textbox input form for user to enter a display name
 function show_register_block(socket) {
@@ -72,13 +70,14 @@ function show_register_block(socket) {
       const response = JSON.parse(name_exists.responseText)
 
       //check existing_users for new name
-      if (response["success"]) {
+      if (response["exists"]) {
+        // name exists - present error and allow new entry
+        alert(`Display name '${new_name}' is already taken.  Try a differnet name.`);
+
+      } else {
         // add name to list of users
         localStorage.setItem('display_name', new_name);
         show_body_block(socket);
-      } else {
-        // name exists - present error and allow new entry
-        alert(`Display name '${new_name}' is already taken.  Try a differnet name.`);
       } // end if else
 
     } // end onload
@@ -99,17 +98,19 @@ function show_register_block(socket) {
 // show main window with event methods attached to elements
 function show_body_block(socket) {
 
-  active_channel = localStorage.getItem('active_channel');
-
   // Build list of channels from server
   build_channel_list();
 
-  if (localStorage.getItem('active_channel') == "null"){
-    //no previously selected channel - show welcome message
-    load_intro();
-  } else {
-    change_channel(active_channel);
+  active_channel = localStorage.getItem('active_channel');
+
+  if ( active_channel == "null" || !channel_exists(active_channel, socket) ){
+    //no previously selected channel or channel doesn't exist - select general
+    localStorage.setItem('active_channel', "general");
+    active_channel = localStorage.getItem('active_channel');
   }
+
+  change_channel(active_channel);
+
 
   // When a new channel is announed by the server, add it to the channel list
   socket.on('add_new_channel', new_ch => {
@@ -117,8 +118,7 @@ function show_body_block(socket) {
       new_card.setAttribute("id", `${cn}cardappear`)
       new_card.style.animationPlayState = 'running';
 
-      //if the new channel was created by the user
-      //then switch to that channel
+      // if the new channel was created by the user, switch to new channel
       if (new_ch.owner == localStorage.getItem('display_name')) {
         change_channel(new_ch.name);
       }
@@ -181,17 +181,9 @@ function build_channel_list() {
 } // end build_channel_list()
 
 
-//load intro screen if no channel has been selected
-function load_intro() {
-  const intro = document.createElement('div');
-  intro.className = "container"
-  intro.innerHTML = `Welcome, ${localStorage.getItem('display_name')}`
-  document.querySelector('#chat_listing').append(intro);
-} // end load_intro()
 
 
-
-// append a new post to the current #chat_listing window
+// append a new post to the current chat_listing window
 function add_post_to_window(post, full_loading=false) {
 
   const post_div = document.createElement('div');
@@ -208,7 +200,8 @@ function add_post_to_window(post, full_loading=false) {
 
   //post text for display
   post_div.innerHTML = `${post.user}: ${post.txt}`;
-  // TODO: add the animation
+
+  // add the animation
   // find the previous newpost id and remove that id from the element
   prev_post = document.getElementById('newpost');
   if (prev_post !== null) {
@@ -223,11 +216,12 @@ function add_post_to_window(post, full_loading=false) {
   chat_listing.scrollTop = chat_listing.scrollHeight
 
   // run the animation, but only when not loading the full list
-  if (!full_loading) {
-    post_div.style.animationPlayState = 'running';
+  if (full_loading) {
+    post_div.style.animationDuration = "0s";
   }
+  post_div.style.animationPlayState = 'running';
 
-  //update header elements in window
+  //update header elements
   document.querySelector('#header_posts').innerHTML = post.num_posts;
   document.querySelector('#header_last').innerHTML = disp_time(post.time);
 
@@ -252,7 +246,6 @@ function setup_add_channel(socket) {
   // enable "add channel" button when entered display name is valid
   // channel names can't start with a number of be longer than 12 characters
   txtbox.onkeyup = (e) => {
-    // TODO: Ensure name contains 3 visible characters
     if (txtbox.value.length > 12) {
       //limit channel name to 12 characters
       txtbox.value = txtbox.value.slice(0, -1);
@@ -284,18 +277,38 @@ function setup_add_channel(socket) {
 }// ****  END setup_add_channel
 
 
+
 // will add a channel to the server based on text in txt_add_channel box
 // when server creates channel, it will emit the new channel
 function add_channel(socket) {
 
+  const new_ch = document.querySelector('#txt_add_channel').value.toString();
+  //replace spaces with _
+  cn = new_ch.replace(/ /g,"_").toString();
+
+  if (channel_exists(cn, socket)){
+    alert(`Channel '${new_ch}' is already being used.  Try a differnet name.`);
+  } else {
+    // emit new channel to to server
+    document.querySelector('#txt_add_channel').value = "";
+    document.querySelector('#btn_add_channel').disabled = true;
+    socket.emit('new_channel', cn, localStorage.getItem('display_name'));
+  }
+
+} // end add_channel()
+
+
+//return true if a channel already exists, false if it does not
+function channel_exists(channel, socket) {
+
   // initialize new request
   const ch_exists = new XMLHttpRequest();
-  const new_ch = document.querySelector('#txt_add_channel').value.toString();
+  const new_ch = channel.toString();
 
   //replace spaces with _
   cn = new_ch.replace(/ /g,"_").toString();
 
-  ch_exists.open('POST', '/add_channel');
+  ch_exists.open('POST', '/channel_exists');
 
   //when request is completed
   ch_exists.onload = () => {
@@ -304,28 +317,25 @@ function add_channel(socket) {
     const response = JSON.parse(ch_exists.responseText)
 
     //check existing channels for new channel name
-    if (!response["success"]) {
-      // name exists already - alert user - pick another name
-      alert(`Channel '${new_ch}' is already being used.  Try a differnet name.`);
+    if (response["exists"]) {
+      // name exists
+      return true;
     } else {
-      // emit new channel to to server
-      document.querySelector('#txt_add_channel').value = "";
-      document.querySelector('#btn_add_channel').disabled = true;
-      socket.emit('new_channel', cn);
+      return false;
     }
 
   } // end onload
 
   // Add channel name and display name to request sent to server
-  const channel = new FormData();
-  channel.append('new_ch', cn);
-  channel.append('ch_owner', localStorage.getItem('display_name'))
+  const check_channel = new FormData();
+  check_channel.append('channel', cn);
 
   // Send request
-  ch_exists.send(channel);
+  ch_exists.send(check_channel);
   return false; // avoid sending the form and creating an HTTP POST request
 
-} // end add_channel()
+
+}
 
 
 function setup_add_post(socket) {
@@ -343,12 +353,12 @@ function setup_add_post(socket) {
     }
   }
 
-
   document.querySelector('#btn_add_post').onclick = () => {
     add_post(socket);
-  } // end add channel on button click
+  }
 
 } // end setup_add_post()
+
 
 // will add post to the chat window and set appropriate screen elements
 function add_post(socket) {
@@ -372,6 +382,7 @@ function clear_posts() {
 
 } // end clear_posts()
 
+
 // load posts for channel name sent as parameter
 function load_posts(channel) {
 
@@ -387,7 +398,8 @@ function load_posts(channel) {
       const response = JSON.parse(get_chat.responseText);
 
       if (response.error) {
-        load_intro();
+        // something really wrong - select general channel
+        change_channel("general")
       } else {
         //loop through posts and add them to chat window
         for (post in response) {
