@@ -96,8 +96,6 @@ function show_register_block(socket) {
 } // end show_register_block
 
 
-
-
 // show main window with event methods attached to elements
 function show_body_block(socket) {
 
@@ -115,7 +113,9 @@ function show_body_block(socket) {
 
   // When a new channel is announed by the server, add it to the channel list
   socket.on('add_new_channel', new_ch => {
-      add_channel_card(new_ch.name, new_ch);
+      new_card = add_channel_card(new_ch.name, new_ch);
+      new_card.setAttribute("id", `${cn}cardappear`)
+      new_card.style.animationPlayState = 'running';
 
       //if the new channel was created by the user
       //then switch to that channel
@@ -142,8 +142,8 @@ function show_body_block(socket) {
     //Start channel card animation by adding animation id to element
     //When animation is done, the 'animationend' event will trigger which
     //will remove the animation id and allow a subsequent trigger of the animation
-    document.querySelector(`[data-channel=${cn}]`).childNodes[0].setAttribute("id", `${cn}cardanimation`)
-    document.querySelector(`#${cn}cardanimation`).style.animationPlayState = 'running';
+    document.querySelector(`[data-channel=${cn}]`).childNodes[0].setAttribute("id", `${cn}cardflash`)
+    document.querySelector(`#${cn}cardflash`).style.animationPlayState = 'running';
 
   }); // end add_new_post on socket
 
@@ -192,7 +192,7 @@ function load_intro() {
 
 
 // append a new post to the current #chat_listing window
-function add_post_to_window(post) {
+function add_post_to_window(post, full_loading=false) {
 
   const post_div = document.createElement('div');
   const chat_listing = document.querySelector('#chat_listing');
@@ -208,12 +208,24 @@ function add_post_to_window(post) {
 
   //post text for display
   post_div.innerHTML = `${post.user}: ${post.txt}`;
+  // TODO: add the animation
+  // find the previous newpost id and remove that id from the element
+  prev_post = document.getElementById('newpost');
+  if (prev_post !== null) {
+    prev_post.removeAttribute("id");
+  }
+
+  // now, add newpost id to the newly posted item
+  post_div.setAttribute("id", `newpost`);
 
   //add the newly created posting to the chat listing
   chat_listing.appendChild(post_div);
-  //TODO: scroll to bottom of window slowly to highlight new post
-  //scroll to the bottom of the list to show new post
   chat_listing.scrollTop = chat_listing.scrollHeight
+
+  // run the animation, but only when not loading the full list
+  if (!full_loading) {
+    post_div.style.animationPlayState = 'running';
+  }
 
   //update header elements in window
   document.querySelector('#header_posts').innerHTML = post.num_posts;
@@ -222,13 +234,11 @@ function add_post_to_window(post) {
 } // end add_post_to_window()
 
 
-
 // set properties of body_block elements
 function set_body_block_elements(socket){
   setup_add_channel(socket);
   setup_add_post(socket);
 } // end set_body_block_elements()
-
 
 
 function setup_add_channel(socket) {
@@ -350,12 +360,11 @@ function add_post(socket) {
 
   // emit new post to to server
   socket.emit('add_post', post_ch, post_txt, post_user, post_time);
-  console.log(`emitting to channel: ${post_ch}`);
   document.querySelector('#btn_add_post').disabled = true;
   document.querySelector('#txt_add_post').value = "";
 } // end add_post()
 
-function clear_posts(channel) {
+function clear_posts() {
   chat_window = document.querySelector('#chat_listing');
   while (chat_window.firstChild) {
     chat_window.removeChild(chat_window.firstChild);
@@ -382,7 +391,7 @@ function load_posts(channel) {
       } else {
         //loop through posts and add them to chat window
         for (post in response) {
-          add_post_to_window(response[post]);
+          add_post_to_window(response[post], true);
         } // end for loop
       }
 
@@ -418,8 +427,15 @@ function disp_time(epoch_time) {
 
 function change_channel(channel) {
 
-  //clear previous channel's posts from window
-  clear_posts(channel);
+  //clear posts from window
+  clear_posts();
+
+  //remove animation from current active channel
+  //removing id ensures no partial animations linger
+  prev_ch = document.getElementById(`${localStorage.getItem('active_channel')}cardpulse`);
+  if (prev_ch !== null){
+    prev_ch.removeAttribute("id");
+  }
 
   //clear header elements in window
   document.querySelector('#header_posts').innerHTML = 0;
@@ -430,6 +446,14 @@ function change_channel(channel) {
 
   //change localStorage
   localStorage.setItem('active_channel', channel);
+
+  //add animation to selected channel
+  active_card = document.querySelector(`[data-channel=${channel}]`);
+  if (active_card !== null) {
+    active_card = document.querySelector(`[data-channel=${channel}]`).parentNode;
+    active_card.setAttribute("id", `${channel}cardpulse`);
+    active_card.style.animationPlayState = 'running';
+  }
 
 }
 
@@ -458,9 +482,7 @@ function add_channel_card(ch_name, ch_data) {
   var a_attr2 = document.createAttribute("data-channel");
   a_attr2.value = ch_name;
   anchor.setAttributeNode(a_attr2);
-  var a_attr3 = document.createAttribute("class");
-  a_attr3.value = "ch_link";
-  anchor.setAttributeNode(a_attr3);
+  anchor.className = "ch_link";
 
   anchor.onclick = () => {
       const sel_channel = anchor.dataset.channel;
@@ -519,9 +541,14 @@ function add_channel_card(ch_name, ch_data) {
   card.appendChild(anchor);
   row.appendChild(card);
 
-  document.querySelector('#channel_listing').appendChild(row);
+  //add the new row to the top of the channel listing
+  chat_window = document.querySelector('#channel_listing');
+  chat_window.insertBefore(row, chat_window.firstChild);
 
-} // end build_channel_card()
+  // return the newly added row to add an id and initiate animation
+  return row;
+
+} // end add_channel_card()
 
 
 //removes id from the card header
@@ -536,11 +563,6 @@ function reset_new_message_animation (animation) {
   element.removeAttribute("id");
 
 }
-
-//https://css-tricks.com/controlling-css-animations-transitions-javascript/
-// make the transition as a class and add that class to class
-// after running an automation, remove the class from the element and then readd it
-// https://css-tricks.com/restart-css-animation/
 
 
 // ######################## END SUPPORTING FUNCTIONS ########################

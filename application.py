@@ -6,127 +6,12 @@ from flask import Flask, session, jsonify, render_template, request
 from flask_session import Session
 from flask_socketio import SocketIO, emit
 
-# CLASS DEFINITIONS
-class Display_names:
-    all_names = []
-
-    def __init__(self, name):
-        self.name = name
-        self.__class__.all_names.append(self.name)
-
-    def exists(name):
-        if name in Display_names.all_names:
-            return True
-        else:
-            return False
-
-
-# TODO: make some of these class methods functions
-class Channel:
-
-    max_posts = 100;
-    # TODO: see if this can now be removed
-    all_channels = {}  # class variable to hold dict of all channel names and owners
-
-    # TODO: Create a list that holds all the channel objects
-    channels = {} # dict{"ch_name": ch_object}
-
-    def __init__(self, name, owner):
-        self.name = name
-        self.owner = owner
-        self.last_post = 0
-        # add new channel to list of channels
-        self.__class__.all_channels[self.name] = {'ch_owner': self.owner, 'last_post': 0}
-        Channel.channels[self.name] = self
-        self.all_posts = []  # instanace variable to hold ordered list of post objects
-
-    def add_post(self, post):
-        self.all_posts.append(post)
-        self.last_post = post.time
-        if len(self.all_posts) > Channel.max_posts:
-            self.all_posts.pop[0]
-        # emit the number of posts and the time of the last post
-
-    def get_posts(self):
-        return self.all_posts
-
-    def get_channel(ch_name):
-        return Channel.channels[ch_name]
-
-    def get_channels():
-        return Channel.channels
-
-    def get_numposts(ch_name):
-        return len(Channel.channels[ch_name].all_posts)
-
-    def jsonify_channels():
-        ch_dict = {}
-        # TODO: If no channels exist - give appropriate reponse -- or make a general channel
-
-        for ch_name, ch_obj in Channel.get_channels().items():
-            if ch_name == None:
-                continue
-            ch_dict[ch_name] = {'owner': ch_obj.owner, 'last_post': ch_obj.last_post, 'num_posts': Channel.get_numposts(ch_name)}
-
-        return jsonify(ch_dict)
-
-    def jsonify_posts(ch_name):
-        all_posts = Channel.get_channel(ch_name).get_posts()
-        post_dict = [] # this will be an ordered list of dictiorary objects
-
-        for post in all_posts:
-            post_dict.append(Post.get_post_dict(post, ch_name))
-
-        return jsonify(post_dict)
-
-    #create channel broadcast data and emit it
-    def emit_channel(ch_name):
-        ch_dict = {}
-        ch = Channel.get_channel(ch_name)
-        ch_dict = {'name': ch_name, 'owner': ch.owner, 'last_post': ch.last_post, 'num_posts': Channel.get_numposts(ch_name)}
-        emit("add_new_channel", ch_dict, broadcast=True)
-
-
-    # return True if channel name already exists; False if name does not exist
-    def exists(ch_name):
-        if ch_name in Channel.all_channels:
-            return True
-        else:
-            return False
-
-    def get_lastpost_time(ch_name):
-        ch = get_channel(ch_name)
-        return ch.last_post
-
-
-class Post():
-    def __init__(self, post_ch, txt, user, time):
-        self.txt = txt
-        self.user = user
-        self.time = time
-
-        # get the channel that the post will be added to
-        channel = Channel.get_channel(post_ch)
-        channel.add_post(self)
-
-    def get_post_dict(self, ch_name):
-        return {"ch_name": ch_name, "txt": self.txt, "user": self.user, "time": self.time, "num_posts": Channel.get_numposts(ch_name)}
-
-
-
-
-
-# END CLASS DEFINITIONS
-
-
+from classes import Display_names, Channel, Post
 
 
 app = Flask(__name__)
 
 # Check for environment variables
-# if not os.getenv("DATABASE_URL"):
-#     raise RuntimeError("-- Environment variable DATABASE_URL is not set")
-
 if not os.getenv("FLASK_APP"):
     raise RuntimeError("-- Environment variable FLASK_APP is not set")
 
@@ -134,49 +19,20 @@ if not os.getenv("FLASK_APP"):
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+# app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 socketio = SocketIO(app)
 Session(app)
 
+# create a 'general' channel so at least one channel exists
 Channel("general", "chatterbox admin")
-# TODO: ERASE THIS BEFORE SUBMISSION
-# TESTING AND DEVELOPMENT
-Channel("cycling", "Mark")
-Channel("bed_bugs", "Cindy")
-ch1 = Channel.get_channel("cycling")
-ch2 = Channel.get_channel("bed_bugs")
-
-post1 = Post(ch1.name, "This is my first post!", "Gerald", 1532048464961)
-post2 = Post(ch1.name, "This is crazy stuff!", "Betty", 1532048464961)
-post3 = Post(ch1.name, "Did you know the sky was blue?", "Gerald", 1532048464961)
-post4 = Post(ch1.name, "Blue!  I've never left the basement since I was a small child.", "Dizzy", 1532048464961)
-
-post1 = Post(ch2.name, "My legs are itching.", "Sparky", 1532048464961)
-post2 = Post(ch2.name, "Do you have alergies?", "Jenny", 1532048464961)
-post3 = Post(ch2.name, "Spider bites?", "Gerald", 1532048464961)
-post4 = Post(ch2.name, "I am an expert on itchy legs.  You have bed bugs!", "Dr. No", 1532048464961)
-post5 = Post(ch2.name, "Please stop making staements you know nothing about!", "Dr. No", 1532048464961)
 
 
-# for ch_name, ch_obj in Channel.get_channels().items():
-#     print(f"Channel: {ch_name}")
-#     print(f"    Posts:")
-#     for post in ch_obj.get_posts():
-#         print(f"        User: {post.user}   Msg: {post.txt}")
-
-
-
-
-# END TESTING AND DEVELOPMENT
-
-# add_new_channel and get_channels have to return the same thing
-
+# ROUTES ###############################################
 
 @app.route("/")
 def index():
     return render_template("index.html")
-
 
 # add new name
 @app.route("/add_newname", methods=["POST"])
@@ -190,21 +46,6 @@ def add_newname():
         # add name and return success
         Display_names(new_name)
         return jsonify({"success": True})
-
-
-
-# emit new channel
-@socketio.on("new_channel")
-def new_channel(ch_name):
-    Channel.emit_channel(ch_name);
-
-
-# emit new channel
-@socketio.on("add_post")
-def add_post(post_ch, post_txt, post_user, post_time):
-    new_post = Post(post_ch, post_txt, post_user, post_time);
-    emit("add_new_post", new_post.get_post_dict(post_ch), broadcast=True);
-
 
 # add new channel -- this will not emit it
 # adding channel as soon as it is confirmed will avoid
@@ -223,7 +64,7 @@ def add_channel():
         new_channel = Channel(ch_name, owner) # create new channel object
         return jsonify({"success": True})
 
-
+# called by client to load posts in a channel
 @app.route("/get_posts", methods=["POST"])
 def add_posts():
 
@@ -234,8 +75,25 @@ def add_posts():
     else:
         return jsonify({"error": True})
 
-
-
+# called by client that needs to load the channel list
 @app.route("/get_channels")
 def get_channels():
     return Channel.jsonify_channels()
+
+# END ROUTES ###############################################
+
+
+# SOCKETS ###############################################
+
+# emit new channel
+@socketio.on("new_channel")
+def new_channel(ch_name):
+    Channel.emit_channel(ch_name);
+
+# emit new channel
+@socketio.on("add_post")
+def add_post(post_ch, post_txt, post_user, post_time):
+    new_post = Post(post_ch, post_txt, post_user, post_time);
+    emit("add_new_post", new_post.get_post_dict(post_ch), broadcast=True);
+
+# END SOCKETS ###############################################

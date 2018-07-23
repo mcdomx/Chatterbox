@@ -29,6 +29,16 @@ p {
   margin: 0px;
 }
 
+.card {
+  border-width: 3px;
+  border-color: white;
+}
+
+.card:hover {
+  border-width: 3px;
+  border-color: orange;
+}
+
 .card_element {
   margin: 0px;
 }
@@ -93,7 +103,7 @@ input[type=text] {
 }
 
 /* ANIMATIONS */
-@keyframes scroll_posts {
+@keyframes appear_post {
   0% {
     scrollTop: 0;
   }
@@ -101,7 +111,46 @@ input[type=text] {
     scrollTop: 2000;
   }
 }
-@keyframes flash_badge {
+@keyframes appear_card {
+  from {
+    height: 0px;
+    opacity: 0;
+  }
+  to {
+    height: 110px;
+    opacity: 1;
+  }
+}
+div[id$=cardappear] {
+  animation-name: appear_card;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes appear_post {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+    background-color: yellow;
+  }
+  75% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 1;
+    background-color: default;
+  }
+}
+#newpost {
+  animation-name: appear_post;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+  animation-play-state: paused;
+}
+
+@keyframes flash_card {
   0% {
     background-color: darkblue;
   }
@@ -112,8 +161,24 @@ input[type=text] {
     background-color: darkblue;
   }
 }
-div[id$=cardanimation] {
-  animation: flash_badge 1s ease 1;
+div[id$=cardflash] {
+  animation: flash_card 1s ease 1;
+  animation-play-state: paused;
+}
+
+@keyframes pulse_card {
+  0% {
+    border-color: white;
+  }
+  50% {
+    border-color: red;
+  }
+  100% {
+    border-color: white;
+  }
+}
+div[id$=cardpulse] {
+  animation: pulse_card 2.5s infinite;
   animation-play-state: paused;
 }
 
