@@ -28,7 +28,7 @@ class Display_names:
 class Channel:
 
     # max number of posts held on server side.
-    max_posts = 100;
+    max_posts = 5;
 
     # hols dictionary of all channels created
     channels = {} # dict{"ch_name": ch_object}
