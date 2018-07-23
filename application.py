@@ -65,15 +65,19 @@ def add_newname():
 #         return jsonify({"success": True})
 
 
-# check if channel name already exists
-@app.route("/channel_exists", methods=["POST"])
+# add channel if it doesn't already exist
+# client will emit channel with a True response
+@app.route("/add_channel", methods=["POST"])
 def channel_exists():
     ch_name = request.form.get("channel")
+    ch_owner = request.form.get("ch_owner")
 
     if (Channel.exists(ch_name)):
-        return jsonify({"exists": True})
+        return jsonify({"success": False})
     else:
-        return jsonify({"exists": False})
+        Channel(ch_name, ch_owner) # create new channel object
+        return jsonify({"success": True})
+
 
 
 # called by client to load posts in a channel
@@ -99,8 +103,7 @@ def get_channels():
 
 # emit new channel
 @socketio.on("new_channel")
-def new_channel(ch_name, ch_owner):
-    Channel(ch_name, ch_owner) # create new channel object
+def new_channel(ch_name):
     Channel.emit_channel(ch_name);
 
 # emit new channel

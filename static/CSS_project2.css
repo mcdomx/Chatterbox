@@ -103,21 +103,13 @@ input[type=text] {
 }
 
 /* ANIMATIONS */
-@keyframes appear_post {
-  0% {
-    scrollTop: 0;
-  }
-  100% {
-    scrollTop: 2000;
-  }
-}
 @keyframes appear_card {
   from {
     height: 0px;
     opacity: 0;
   }
   to {
-    height: 110px;
+    height: 115px;
     opacity: 1;
   }
 }

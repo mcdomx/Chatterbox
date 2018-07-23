@@ -28,7 +28,7 @@ class Display_names:
 class Channel:
 
     # max number of posts held on server side.
-    max_posts = 5;
+    max_posts = 100;
 
     # hols dictionary of all channels created
     channels = {} # dict{"ch_name": ch_object}
@@ -61,8 +61,7 @@ class Channel:
 
     def jsonify_channels():
         ch_dict = {}
-        # TODO: If no channels exist - give appropriate reponse -- or make a general channel
-
+        
         for ch_name, ch_obj in Channel.get_channels().items():
             if ch_name == None:
                 continue

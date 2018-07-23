@@ -10,8 +10,15 @@ When visiting a channel, the user's posts are displayed on the right side of the
 
 New posts adjust the chat window so the newest post is always displayed at the bottom of the window.  If chats exceed the window size, the window will scroll.  When channels exceed the size of the vertical column holding the chats, they will also be in a scroll window.
 
-The user can change a channel by clicking the respective channel card in the left column.  
+The user can change a channel by clicking the respective channel card in the left column.
 
+
+## Improvements
+Because a database is not being used, the integrity of data depends on Flask remaining up-and-running.  Once Flask stops, the application does not work as intended.  As this was not clarified as a requirement, I made little effort to account for anomalies that happen when Flask restarts (e.g - a user's display could be re-added by someone else, the user's active channel no longer exists, etc.).  
+
+The layout is not as responsive to changes in the window size as I would prefer.  I used bootstrap to do much of the design and struggled to get the chat window to resize instead of jumping to a second row of display elements.  As a result, the user needs to use a reasonable window width to see the app reasonably.
+
+## Personal Touch
 As a personal touch, I added some helpful animations:
 - newly added channels slide into place at the top of the channel listing
 - the active channel pulses mildly in the channel listing

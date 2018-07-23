@@ -43,21 +43,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // display textbox input form for user to enter a display name
 function show_register_block(socket) {
+
   document.querySelector('#register_block').hidden = false;
   document.querySelector('#txt_dispname').hidden = true;
 
   // enable display name button when entered name is valid
   document.querySelector('#txtinput_dispname').onkeyup = () => {
-  // TODO: Ensure name contains 3 visible characters
       if (document.querySelector('#txtinput_dispname').value.length > 3)
           document.querySelector('#btn_dispname').disabled = false;
       else
           document.querySelector('#btn_dispname').disabled = true;
-  }
+  } // end onkeyup
 
   //when then display name is submitted by the user
   document.querySelector('#frm_dispname').onsubmit = () => {
-
     //initialize new request
     const name_exists = new XMLHttpRequest();
     const new_name = document.querySelector('#txtinput_dispname').value;
@@ -65,7 +64,6 @@ function show_register_block(socket) {
 
     //when request is completed
     name_exists.onload = () => {
-
       //extract JSON data from request
       const response = JSON.parse(name_exists.responseText)
 
@@ -79,7 +77,6 @@ function show_register_block(socket) {
         localStorage.setItem('display_name', new_name);
         show_body_block(socket);
       } // end if else
-
     } // end onload
 
     // Add data to send with request
@@ -87,11 +84,10 @@ function show_register_block(socket) {
     data.append('new_name', new_name);
 
     // Send request
-    //TODO: See if I can do this without using FormData.  Just send new_name.  Will need to chaneg Python function.
     name_exists.send(data);
     return false; // avoid sending the form and creating an HTTP POST request
-
   }; // end onsubmit frm_dispname
+
 } // end show_register_block
 
 
@@ -103,7 +99,7 @@ function show_body_block(socket) {
 
   active_channel = localStorage.getItem('active_channel');
 
-  if ( active_channel == "null" || !channel_exists(active_channel, socket) ){
+  if ( active_channel == "null" ){
     //no previously selected channel or channel doesn't exist - select general
     localStorage.setItem('active_channel', "general");
     active_channel = localStorage.getItem('active_channel');
@@ -115,7 +111,7 @@ function show_body_block(socket) {
   // When a new channel is announed by the server, add it to the channel list
   socket.on('add_new_channel', new_ch => {
       new_card = add_channel_card(new_ch.name, new_ch);
-      new_card.setAttribute("id", `${cn}cardappear`)
+      new_card.setAttribute("id", `${new_ch.name}cardappear`)
       new_card.style.animationPlayState = 'running';
 
       // if the new channel was created by the user, switch to new channel
@@ -127,28 +123,25 @@ function show_body_block(socket) {
 
   // When a post is announed by the server, add it to the channel list
   socket.on('add_new_post', new_post => {
+      cn = new_post.ch_name;
+      // If post is to active channel update the window
+      if (localStorage.getItem('active_channel') == cn) {
+        add_post_to_window(new_post);
+      }
 
-    cn = new_post.ch_name;
+      // update the channel card statisitics
+      document.querySelector('#'+cn+'numposts').innerHTML = new_post.num_posts;
+      document.querySelector('#'+cn+'lastpost').innerHTML = disp_time(new_post.time);
 
-    // If post is to active channel update the window
-    if (localStorage.getItem('active_channel') == cn) {
-      add_post_to_window(new_post);
-    }
-
-    // update the channel card statisitics
-    document.querySelector('#'+cn+'numposts').innerHTML = new_post.num_posts;
-    document.querySelector('#'+cn+'lastpost').innerHTML = disp_time(new_post.time);
-
-    //Start channel card animation by adding animation id to element
-    //When animation is done, the 'animationend' event will trigger which
-    //will remove the animation id and allow a subsequent trigger of the animation
-    document.querySelector(`[data-channel=${cn}]`).childNodes[0].setAttribute("id", `${cn}cardflash`)
-    document.querySelector(`#${cn}cardflash`).style.animationPlayState = 'running';
-
+      //Start channel card animation by adding animation id to element
+      //When animation is done, the 'animationend' event will trigger which
+      //will remove the animation id and allow a subsequent trigger of the animation
+      document.querySelector(`[data-channel=${cn}]`).childNodes[0].setAttribute("id", `${cn}cardflash`)
+      document.querySelector(`#${cn}cardflash`).style.animationPlayState = 'running';
   }); // end add_new_post on socket
 
-
   set_body_block_elements(socket);
+
   document.querySelector('#register_block').hidden = true;
   document.querySelector('#txt_dispname').hidden = false;
   document.querySelector('#body_block').hidden = false;
@@ -156,6 +149,75 @@ function show_body_block(socket) {
                         `Display Name: ${localStorage.getItem('display_name')}`;
 
 } // end show_body_block()
+
+// set properties of body_block elements
+function set_body_block_elements(socket){
+  setup_add_channel(socket);
+  setup_add_post(socket);
+} // end set_body_block_elements()
+
+function setup_add_channel(socket) {
+
+  //assign variables to elements for readability
+  btn = document.querySelector('#btn_add_channel');
+  txtbox = document.querySelector('#txt_add_channel');
+
+  btn.disabled = true;  //start with disabled add button
+
+  // enable "add channel" button when entered display name is valid
+  // channel names can't start with a number of be longer than 12 characters
+  txtbox.onkeyup = (e) => {
+    if (txtbox.value.length > 12) {
+      //limit channel name to 12 characters
+      txtbox.value = txtbox.value.slice(0, -1);
+    }
+    else if (txtbox.value.length == 1){
+      //test first charcter in channel name for a digit
+      if (txtbox.value >=0 || txtbox.value <=9) {
+        txtbox.value = txtbox.value.slice(0, 0);
+      }
+    }
+    else if (txtbox.value.length > 2){
+      //enable add button if 3 character minimum is reached
+      btn.disabled = false;
+      if (e.keyCode == 13) { add_channel(txtbox.value, socket); };
+    }
+    else {
+      //otherewise disable the add button
+      btn.disabled = true;
+      if (e.keyCode == 13) { };
+    }
+  };
+
+  // add channel to server upon click
+  // server will emit new channel when created
+  document.querySelector('#btn_add_channel').onclick = () => {
+    const new_ch = document.querySelector('#txt_add_channel').value.toString();
+    add_channel(new_ch, socket);
+  }; // end add channel on button click
+
+}// ****  END setup_add_channel
+
+
+function setup_add_post(socket) {
+
+  document.querySelector('#btn_add_post').disabled = true;
+
+  // setup the txt box so that if empty can't submit
+  document.querySelector('#txt_add_post').onkeyup = (e) => {
+    if (document.querySelector('#txt_add_post').value.length > 0){
+        document.querySelector('#btn_add_post').disabled = false;
+        if (e.keyCode == 13) { add_post(socket); };
+    } else {
+        document.querySelector('#btn_add_post').disabled = true;
+        if (e.keyCode == 13) { };
+    }
+  }
+
+  document.querySelector('#btn_add_post').onclick = () => {
+    add_post(socket);
+  }
+} // end setup_add_post()
 
 
 // on initial load of page, build the list of of channels stored on server
@@ -199,7 +261,8 @@ function add_post_to_window(post, full_loading=false) {
   } // end if-else
 
   //post text for display
-  post_div.innerHTML = `${post.user}: ${post.txt}`;
+  post_time = disp_time(post.time, true);
+  post_div.innerHTML = `${post.user} (${post_time}): ${post.txt}`;
 
   // add the animation
   // find the previous newpost id and remove that id from the element
@@ -228,78 +291,15 @@ function add_post_to_window(post, full_loading=false) {
 } // end add_post_to_window()
 
 
-// set properties of body_block elements
-function set_body_block_elements(socket){
-  setup_add_channel(socket);
-  setup_add_post(socket);
-} // end set_body_block_elements()
 
 
-function setup_add_channel(socket) {
 
-  //assign variables to elements for readability
-  btn = document.querySelector('#btn_add_channel');
-  txtbox = document.querySelector('#txt_add_channel');
-
-  btn.disabled = true;  //start with disabled add button
-
-  // enable "add channel" button when entered display name is valid
-  // channel names can't start with a number of be longer than 12 characters
-  txtbox.onkeyup = (e) => {
-    if (txtbox.value.length > 12) {
-      //limit channel name to 12 characters
-      txtbox.value = txtbox.value.slice(0, -1);
-    }
-    else if (txtbox.value.length == 1){
-      //test first charcter in channel name for a digit
-      if (txtbox.value >=0 || txtbox.value <=9) {
-        txtbox.value = txtbox.value.slice(0, 0);
-      }
-    }
-    else if (txtbox.value.length > 2){
-      //enable add button if 3 character minimum is reached
-      btn.disabled = false;
-      if (e.keyCode == 13) { add_channel(socket); };
-    }
-    else {
-      //otherewise disable the add button
-      btn.disabled = true;
-      if (e.keyCode == 13) { };
-    }
-  };
-
-  // add channel to server upon click
-  // server will emit new channel when created
-  document.querySelector('#btn_add_channel').onclick = () => {
-    add_channel(socket);
-  }; // end add channel on button click
-
-}// ****  END setup_add_channel
 
 
 
 // will add a channel to the server based on text in txt_add_channel box
 // when server creates channel, it will emit the new channel
-function add_channel(socket) {
-
-  const new_ch = document.querySelector('#txt_add_channel').value.toString();
-  //replace spaces with _
-  cn = new_ch.replace(/ /g,"_").toString();
-
-  if (channel_exists(cn, socket)){
-    alert(`Channel '${new_ch}' is already being used.  Try a differnet name.`);
-  } else {
-    // emit new channel to to server
-    document.querySelector('#txt_add_channel').value = "";
-    document.querySelector('#btn_add_channel').disabled = true;
-    socket.emit('new_channel', cn, localStorage.getItem('display_name'));
-  }
-
-} // end add_channel()
-
-
-//return true if a channel already exists, false if it does not
-function channel_exists(channel, socket) {
+function add_channel(channel, socket) {
 
   // initialize new request
   const ch_exists = new XMLHttpRequest();
@@ -308,7 +308,7 @@ function channel_exists(channel, socket) {
   //replace spaces with _
   cn = new_ch.replace(/ /g,"_").toString();
 
-  ch_exists.open('POST', '/channel_exists');
+  ch_exists.open('POST', '/add_channel');
 
   //when request is completed
   ch_exists.onload = () => {
@@ -317,11 +317,13 @@ function channel_exists(channel, socket) {
     const response = JSON.parse(ch_exists.responseText)
 
     //check existing channels for new channel name
-    if (response["exists"]) {
-      // name exists
-      return true;
+    if (!response["success"]) {
+      alert(`Channel '${new_ch}' is already being used.  Try a differnet name.`);
     } else {
-      return false;
+      // emit new channel to to server
+      document.querySelector('#txt_add_channel').value = "";
+      document.querySelector('#btn_add_channel').disabled = true;
+      socket.emit('new_channel', cn);
     }
 
   } // end onload
@@ -335,29 +337,11 @@ function channel_exists(channel, socket) {
   return false; // avoid sending the form and creating an HTTP POST request
 
 
-}
+} // end add_channel()
 
 
-function setup_add_post(socket) {
 
-  document.querySelector('#btn_add_post').disabled = true;
 
-  // setup the txt box so that if empty can't submit
-  document.querySelector('#txt_add_post').onkeyup = (e) => {
-    if (document.querySelector('#txt_add_post').value.length > 0){
-        document.querySelector('#btn_add_post').disabled = false;
-        if (e.keyCode == 13) { add_post(socket); };
-    } else {
-        document.querySelector('#btn_add_post').disabled = true;
-        if (e.keyCode == 13) { };
-    }
-  }
-
-  document.querySelector('#btn_add_post').onclick = () => {
-    add_post(socket);
-  }
-
-} // end setup_add_post()
 
 
 // will add post to the chat window and set appropriate screen elements
@@ -426,7 +410,7 @@ function load_posts(channel) {
 
 
 // convert epoch time to human readbale time for display
-function disp_time(epoch_time) {
+function disp_time(epoch_time, short=false) {
     t = new Date(epoch_time);
     y = t.getFullYear().toString().slice(-2);
     m = t.getMonth()+1;
@@ -434,7 +418,11 @@ function disp_time(epoch_time) {
     h = ("0" + (t.getHours()+1)).slice(-2);
     mm = ("0" + (t.getMinutes()+1)).slice(-2);
 
-    return `${m}/${d}/${y} ${h}:${mm}`;
+    if (short) {
+      return `${m}/${d} ${h}:${mm}`; //short form
+    } else {
+      return `${m}/${d}/${y} ${h}:${mm}`; //long form
+  }
 }
 
 function change_channel(channel) {
