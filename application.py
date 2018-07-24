@@ -47,34 +47,18 @@ def add_newname():
         Display_names(new_name)
         return jsonify({"exists": False})
 
-# add new channel -- this will not emit it
-# adding channel as soon as it is confirmed will avoid
-# the possibility that a second request for the same name
-# is approved and added before the emit-on process is completed.
-# @app.route("/add_channel", methods=["POST"])
-# def add_channel():
-#     ch_name = request.form.get("new_ch")
-#
-#     if (Channel.exists(ch_name)):
-#         # channel exists, return False
-#         return jsonify({"success": False})
-#     else:
-#         # add channel and return success
-#         owner =  request.form.get("ch_owner")
-#         new_channel = Channel(ch_name, owner) # create new channel object
-#         return jsonify({"success": True})
-
 
 # add channel if it doesn't already exist
 # client will emit channel with a True response
 @app.route("/add_channel", methods=["POST"])
 def channel_exists():
     ch_name = request.form.get("channel")
-    ch_owner = request.form.get("ch_owner")
+    ch_owner = request.form.get("owner")
 
     if (Channel.exists(ch_name)):
         return jsonify({"success": False})
     else:
+        # add new channel immediately to avoid duplicate being added at same time
         Channel(ch_name, ch_owner) # create new channel object
         return jsonify({"success": True})
 

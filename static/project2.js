@@ -117,8 +117,6 @@ function show_body_block(socket) {
   document.querySelector('#txt_dispname').innerHTML =
                         `Display Name: ${localStorage.getItem('display_name')}`;
 
-  change_channel(active_channel);
-
 } // end show_body_block()
 
 
@@ -238,6 +236,8 @@ function build_channel_list() {
     for (channel in channel_list) {
       add_channel_card(channel, channel_list[channel])
     }
+
+    change_channel(localStorage.getItem('active_channel'));
   } // end onload
 
   get_channels.send();
@@ -325,6 +325,7 @@ function add_channel(channel, socket) {
   // Add channel name and display name to request sent to server
   const check_channel = new FormData();
   check_channel.append('channel', cn);
+  check_channel.append('owner', localStorage.getItem('display_name'));
 
   // Send request
   ch_exists.send(check_channel);
@@ -347,12 +348,12 @@ function add_post(socket) {
   document.querySelector('#txt_add_post').value = "";
 } // end add_post()
 
+
 function clear_posts() {
   chat_window = document.querySelector('#chat_listing');
   while (chat_window.firstChild) {
     chat_window.removeChild(chat_window.firstChild);
   }
-
 } // end clear_posts()
 
 
@@ -369,7 +370,6 @@ function load_posts(channel) {
     get_chat.onload = () => {
       //extract JSON data from request
       const response = JSON.parse(get_chat.responseText);
-
       if (response.error) {
         // something really wrong - select general channel
         change_channel("general")
@@ -379,12 +379,10 @@ function load_posts(channel) {
           add_post_to_window(response[post], true);
         } // end for loop
       }
-
       //remove the underscore for display
       ch_name_display = channel.replace(/_/g," ");
       // dislay the newly selected channel's name in the header
       document.querySelector('#header_chname').innerHTML = ch_name_display;
-
     }; // end onload
 
     // Add channel name and display name to request sent to server
