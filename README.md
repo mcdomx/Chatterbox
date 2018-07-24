@@ -12,6 +12,8 @@ New posts adjust the chat window so the newest post is always displayed at the b
 
 The user can change a channel by clicking the respective channel card in the left column.
 
+No special environment variables are necessary; however, running the shell script 'env_variables.sh' will set the FLASK_APP to application.py and turn on debugging.
+
 
 ## Improvements
 Because a database is not being used, the integrity of data depends on Flask remaining up-and-running.  Once Flask stops, the application will not act as intended.  As this was not clarified as a requirement, I made little effort to account for anomalies that happen when Flask restarts (e.g - a user's display could be re-added by someone else, the user's active channel no longer exists, etc.).  
