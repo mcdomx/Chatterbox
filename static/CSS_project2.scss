@@ -61,6 +61,7 @@ p {
 .card {
   border-width: 3px;
   border-color: white;
+  min-width: 14rem;
 }
 
 .card:hover{
@@ -105,26 +106,21 @@ input[type=text]{
   padding: 5px;
   font-size: 120%;
   font-weight: 900;
+  color: white;
+  background-color: darkblue;
 }
 
 #chat_header1 {
   @extend %chat_header_items;
-  color: white;
-  background-color: darkblue;
 }
 
 #chat_header2 {
   @extend %chat_header_items;
-  color: white;
-  background-color: darkblue;
 }
 
 #chat_header3 {
   @extend %chat_header_items;
-  color: white;
-  background-color: darkblue;
 }
-
 
 
 .self_chatbox {
@@ -140,7 +136,7 @@ input[type=text]{
 
 
 /* ANIMATIONS */
-
+// animation to make new channel card appear
 @keyframes appear_card {
     from {
         height: 0px;
@@ -157,8 +153,9 @@ div[id$='cardappear'] {
     animation-duration: 1s;
     animation-fill-mode: forwards;
 }
+// end animation to show new channel card
 
-
+// animation to show a new post in active window
 @keyframes appear_post {
     0% {
       opacity: 0;
@@ -183,8 +180,9 @@ div[id$='cardappear'] {
     animation-fill-mode: forwards;
     animation-play-state: paused;
 }
+// end animatino to show new post
 
-
+// animation to highlight new post to channel
 @keyframes flash_card {
     0% {
       background-color: darkblue;
@@ -201,8 +199,9 @@ div[id$='cardflash'] {
     animation: flash_card 1s ease 1;
     animation-play-state: paused;
 }
+// end new channel post animation
 
-
+// animation for active card pulsing
 @keyframes pulse_card {
     0% {
       border-color: white;
@@ -219,27 +218,4 @@ div[id$='cardpulse'] {
     animation: pulse_card 2.5s infinite;
     animation-play-state: paused;
 }
-
-
-
-
-
-// selects div that end with 'numposts'
-// intended to target the pill basges for channel cards
-// div[id$='cardhead'] {
-//       // position: relative;
-//       animation-name: flash_badge;
-//       animation-duration: .75s;
-//       // animation-fill-mode: forwards;
-//       animation-iteration-count: 1;
-// }
-
-// style="animation-name: flash_badge; animation-duration: .75s; animation-iteration-count: 1;"
-
-// h1 {
-//     position: relative;
-//     animation-name: move;
-//     animation-duration: 3s;
-//     animation-fill-mode: forwards;
-//     animation-iteration-count: infinite;
-// }
+// end animation for active card

@@ -1,5 +1,4 @@
 
-
 // ########################  begin setup local storage ########################
 
 // Get localStorage item for display name -- setup if none exists
@@ -12,9 +11,7 @@ if (!localStorage.getItem('active_channel')) {
     localStorage.setItem('active_channel', "null");
   }
 
-
 // ########################  end setup local storage ########################
-
 
 
 // ########################  begin DOMContentLoaded ########################
@@ -39,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ########################  end DOMContentLoaded ########################
 
 
-// ######################## BEGIN SUPPORTING FUNCTIONS ########################
+// ######################## BEGIN REGISTER BLOCK ########################
 
 // display textbox input form for user to enter a display name
 function show_register_block(socket) {
@@ -90,6 +87,10 @@ function show_register_block(socket) {
 
 } // end show_register_block
 
+// ######################## END REGISTER BLOCK ########################
+
+
+// ######################## BEGIN CHAT WINDOW BODY BLOCK ########################
 
 // show main window with event methods attached to elements
 function show_body_block(socket) {
@@ -105,9 +106,23 @@ function show_body_block(socket) {
     active_channel = localStorage.getItem('active_channel');
   }
 
+  setup_addnewchannel_socket(socket);
+  setup_addnewpost_socket(socket);
+  setup_add_channel(socket);
+  setup_add_post(socket);
+
+  document.querySelector('#register_block').hidden = true;
+  document.querySelector('#txt_dispname').hidden = false;
+  document.querySelector('#body_block').hidden = false;
+  document.querySelector('#txt_dispname').innerHTML =
+                        `Display Name: ${localStorage.getItem('display_name')}`;
+
   change_channel(active_channel);
 
+} // end show_body_block()
 
+
+function setup_addnewchannel_socket(socket){
   // When a new channel is announed by the server, add it to the channel list
   socket.on('add_new_channel', new_ch => {
       new_card = add_channel_card(new_ch.name, new_ch);
@@ -118,9 +133,10 @@ function show_body_block(socket) {
       if (new_ch.owner == localStorage.getItem('display_name')) {
         change_channel(new_ch.name);
       }
-
   });
+} // end setup_addnewchannel_socket()
 
+function setup_addnewpost_socket(socket){
   // When a post is announed by the server, add it to the channel list
   socket.on('add_new_post', new_post => {
       cn = new_post.ch_name;
@@ -139,22 +155,8 @@ function show_body_block(socket) {
       document.querySelector(`[data-channel=${cn}]`).childNodes[0].setAttribute("id", `${cn}cardflash`)
       document.querySelector(`#${cn}cardflash`).style.animationPlayState = 'running';
   }); // end add_new_post on socket
+} //enmd setup_addnewpost_socket()
 
-  set_body_block_elements(socket);
-
-  document.querySelector('#register_block').hidden = true;
-  document.querySelector('#txt_dispname').hidden = false;
-  document.querySelector('#body_block').hidden = false;
-  document.querySelector('#txt_dispname').innerHTML =
-                        `Display Name: ${localStorage.getItem('display_name')}`;
-
-} // end show_body_block()
-
-// set properties of body_block elements
-function set_body_block_elements(socket){
-  setup_add_channel(socket);
-  setup_add_post(socket);
-} // end set_body_block_elements()
 
 function setup_add_channel(socket) {
 
@@ -243,8 +245,6 @@ function build_channel_list() {
 } // end build_channel_list()
 
 
-
-
 // append a new post to the current chat_listing window
 function add_post_to_window(post, full_loading=false) {
 
@@ -291,12 +291,6 @@ function add_post_to_window(post, full_loading=false) {
 } // end add_post_to_window()
 
 
-
-
-
-
-
-
 // will add a channel to the server based on text in txt_add_channel box
 // when server creates channel, it will emit the new channel
 function add_channel(channel, socket) {
@@ -336,12 +330,7 @@ function add_channel(channel, socket) {
   ch_exists.send(check_channel);
   return false; // avoid sending the form and creating an HTTP POST request
 
-
 } // end add_channel()
-
-
-
-
 
 
 // will add post to the chat window and set appropriate screen elements
@@ -415,8 +404,8 @@ function disp_time(epoch_time, short=false) {
     y = t.getFullYear().toString().slice(-2);
     m = t.getMonth()+1;
     d = t.getDate();
-    h = ("0" + (t.getHours()+1)).slice(-2);
-    mm = ("0" + (t.getMinutes()+1)).slice(-2);
+    h = t.getHours();
+    mm = ("0" + (t.getMinutes())).slice(-2);
 
     if (short) {
       return `${m}/${d} ${h}:${mm}`; //short form
@@ -463,18 +452,15 @@ function add_channel_card(ch_name, ch_data) {
   //reaplce spaces in channel name for display purposes
   ch_name_display = ch_name.replace(/_/g," ");
 
-  //row setup
+  //CARD ROW
   const row = document.createElement('div');
   row.className = "row mx-auto";
 
-  //channel card setup
+  //CARD
   const card = document.createElement('div');
-  card.className = "card text-white bg-primary my-1 mx-auto"
+  card.className = "card text-white bg-primary rounded my-1 mx-auto"
 
-  var card_attr2 = document.createAttribute("style")
-  card_attr2.value = "min-width: 14rem";
-  card.setAttributeNode(card_attr2);
-
+  // card link
   const anchor = document.createElement('a');
   var a_attr1 = document.createAttribute("href");
   a_attr1.value = "";
@@ -483,13 +469,13 @@ function add_channel_card(ch_name, ch_data) {
   a_attr2.value = ch_name;
   anchor.setAttributeNode(a_attr2);
   anchor.className = "ch_link";
-
   anchor.onclick = () => {
       const sel_channel = anchor.dataset.channel;
       change_channel(sel_channel);
       return false;
   };
 
+  // CARD HEADER
   const card_head = document.createElement('div');
   card_head.className = "card-header";
 
@@ -506,7 +492,7 @@ function add_channel_card(ch_name, ch_data) {
   card_head.appendChild(counter);
   counter.innerHTML = ch_data.num_posts;
 
-  //channel card body
+  //CARD BODY
   const card_body = document.createElement('div');
   var card_body_attr = document.createAttribute("class");
   card_body_attr.value = "card-body pt-1 pb-2 px-3";
@@ -518,10 +504,8 @@ function add_channel_card(ch_name, ch_data) {
   card_text_attr.value = "card-text mx-0";
   card_text.setAttributeNode(card_text_attr);
 
-  // ASSIGN CONTENT TO TAGS
   const p_owner = document.createElement('p');
   p_owner.innerHTML = "Owner: " + ch_data.owner;
-
   const p_lastpost = document.createElement('p');
   p_lastpost.innerHTML = "Last: ";
   const s_lastpost = document.createElement('span');
@@ -533,6 +517,7 @@ function add_channel_card(ch_name, ch_data) {
   }
   p_lastpost.appendChild(s_lastpost);
 
+  //BUILD CARD
   card_text.appendChild(p_owner);
   card_text.appendChild(p_lastpost);
   card_body.appendChild(card_text);
@@ -550,7 +535,6 @@ function add_channel_card(ch_name, ch_data) {
 
 } // end add_channel_card()
 
-
 //removes id from the card header
 //the id contains the css for animation
 //id will be readded when the next animation is supposed to happen
@@ -564,5 +548,4 @@ function reset_new_message_animation (animation) {
 
 }
 
-
-// ######################## END SUPPORTING FUNCTIONS ########################
+// ######################## BEGIN CHAT WINDOW BODY BLOCK ########################

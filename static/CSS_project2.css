@@ -32,6 +32,7 @@ p {
 .card {
   border-width: 3px;
   border-color: white;
+  min-width: 14rem;
 }
 
 .card:hover {
@@ -75,19 +76,6 @@ input[type=text] {
   padding: 5px;
   font-size: 120%;
   font-weight: 900;
-}
-
-#chat_header1 {
-  color: white;
-  background-color: darkblue;
-}
-
-#chat_header2 {
-  color: white;
-  background-color: darkblue;
-}
-
-#chat_header3 {
   color: white;
   background-color: darkblue;
 }

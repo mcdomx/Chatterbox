@@ -10,19 +10,14 @@
     <script src="{{ url_for('static', filename='project2.js') }}"></script>
   </head>
 
-
   <body>
-
     <!-- HEADER -->
     <header class="row justify-content-center fixed-top">
       <section class="col-6"><a href="{{ url_for('index') }}">Chatterbox</a></section>
-
-        <section class="col-6" align="right">
-          <!-- If display name has been set in location storage... -->
-          <div hidden id="txt_dispname"></div>
-        </section>
-
-
+      <section class="col-6" align="right">
+        <!-- If display name has been set in location storage... -->
+        <div hidden id="txt_dispname"></div>
+      </section>
     </header>
     <!-- end HEADER -->
 
@@ -40,10 +35,7 @@
 
     <!-- BODY BLOCK - WHEN REGISTERED -->
     <div hidden id="body_block" class="container-fluid"> <!-- MAIN WINDOW -->
-
-      <div id="main_window" class="row border"> <!-- MAIN WINDOW ROW -->
-
-
+      <div id="main_window" class="row"> <!-- MAIN WINDOW ROW -->
           <div class="border border-primary mx-2" style="min-width: 16rem"> <!-- LEFT COLUMN - CHANNELS -->
 
             <!-- ADD NEW CHANNEL INPUT BOX -->
@@ -67,11 +59,10 @@
 
           </div> <!-- LEFT COLUMN - CHANNELS -->
 
-
         <!-- CHAT BOX COLUMN -->
         <div class="container border border-primary ml-1 mr-0" style="min-width: 20rem; max-width: 50rem"> <!-- RIGHT COLUMN - CHAT -->
 
-            <!-- ROW FOR ALL CHAT HEADER -->
+            <!-- CHAT HEADER -->
             <div class="container mb-2 border-bottom">
               <div class="row mx-2 mt-4 mb-2">
                 <div id="chat_header1" class="col-5 rounded">
@@ -86,9 +77,9 @@
                   <div>Last Post:</div>
                   <div id="header_last"></div>
                 </div>
-              </div>
-            </div>
-            <!-- END ROW FOR ALL CHAT HEADER -->
+              </div> <!-- end row for chat header -->
+            </div> <!-- end container for chat header -->
+            <!-- END CHAT HEADER -->
 
             <!-- ROW FOR ALL CHAT ELEMENTS -->
             <!-- <div class"row">  -->
@@ -100,7 +91,6 @@
           <!-- ROW FOR CHAT POST -->
           <div class="row">
             <div class="col align-self-end">
-              <!-- TODO: Does this need to be a form??? -->
               <div id="frm_add_post">
                 <div class="input-group mb-3">
                   <input type="text" id="txt_add_post" class="form-control" placeholder="add message ... ">
@@ -109,25 +99,14 @@
                   </div>
                 </div> <!-- END INPUT GROUP -->
               </div> <!-- end form -->
+            </div> <!-- end col for chat post -->
+          </div> <!-- END ROW FOR CHAT POST -->
 
-          </div>
-          <!-- END ROW FOR CHAT POST -->
+        </div> <!-- end chat column container -->
 
-          </div>
-          <!-- ROW FOR CHAT POST -->
-
-        </div>
-        <!-- CHAT BOX COLUMN -->
-
-      </div> <!-- MAIN WINDOW ROW -->
-
-      </div>
-      <!-- MAIN WINDOW ROW -->
-
-    </div>
-    <!-- MAIN WINDOW -->
-
-    <!-- END BODY BLOCK -->
+      </div> <!-- end main window -->
+    </div> <!-- end body block -->
+    <!-- END BODY BLOCK WHEN REGISTERED -->
 
     <!-- FOOTER -->
     <footer class="row justify-content-left fixed-bottom">
@@ -135,12 +114,6 @@
     </footer>
     <!-- end FOOTER -->
 
-
-    <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script> -->
   </body>
-  </body>
-
 
 </html>
