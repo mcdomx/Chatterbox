@@ -1,8 +1,8 @@
 import os
-import time
-import requests, json
+# import time
+# import requests, json
 
-from flask import Flask, session, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request
 from flask_session import Session
 from flask_socketio import SocketIO, emit
 
@@ -55,13 +55,12 @@ def channel_exists():
     ch_name = request.form.get("channel")
     ch_owner = request.form.get("owner")
 
-    if (Channel.exists(ch_name)):
+    if Channel.exists(ch_name):
         return jsonify({"success": False})
     else:
         # add new channel immediately to avoid duplicate being added at same time
-        Channel(ch_name, ch_owner) # create new channel object
+        Channel(ch_name, ch_owner)  # create new channel object
         return jsonify({"success": True})
-
 
 
 # called by client to load posts in a channel
@@ -88,12 +87,21 @@ def get_channels():
 # emit new channel
 @socketio.on("new_channel")
 def new_channel(ch_name):
-    Channel.emit_channel(ch_name);
+    Channel.emit_channel(ch_name)
 
 # emit new channel
 @socketio.on("add_post")
 def add_post(post_ch, post_txt, post_user, post_time):
-    new_post = Post(post_ch, post_txt, post_user, post_time);
-    emit("add_new_post", new_post.get_post_dict(post_ch), broadcast=True);
+    new_post = Post(post_ch, post_txt, post_user, post_time)
+    emit("add_new_post", new_post.get_post_dict(post_ch), broadcast=True)
 
 # END SOCKETS ###############################################
+
+
+if __name__ == '__main__':
+    # getting error that I need to use gevent-websocket server
+    # Solved this by running the app with socketio rather than app.run
+    socketio.run(app, host='0.0.0.0', port=5000)
+    # only works when using 0.0.0.0 as IP address
+    # app.run(debug=False, host='0.0.0.0')
+

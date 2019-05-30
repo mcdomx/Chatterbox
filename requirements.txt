@@ -1,8 +1,7 @@
 Flask
 Flask-SocketIO
+Flask-Session
 gevent
 gevent-websocket
 ItsDangerous==1.1.0
 requests
-flask_session
-websocket
