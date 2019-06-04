@@ -6,4 +6,4 @@ docker build --no-cache -t chatterbox .
 docker run -d -p 5000:5000 --name chatterbox chatterbox
 
 # To use the shell the application is running in
-docker exec -it chatterbox  bash
+docker exec -it chatterbox bash

@@ -1,5 +1,5 @@
-# Project 2
-Chatterbox
+# Chtterbox
+Barebones web-chat with no fuss.
 
 ## Summary
 This application is a chat platform where users can quickly setup an alias to begin sharing comments.  Any user can setup a channel where any user can readily jump in and submit comments.   
@@ -10,19 +10,54 @@ When visiting a channel, the user's posts are displayed on the right side of the
 
 New posts adjust the chat window so the newest post is always displayed at the bottom of the window.  If chats exceed the window size, the window will scroll.  When channels exceed the size of the vertical column holding the chats, they will also be in a scroll window.  Only 100 messages are stored on the server for any channel.  
 
-The user can change a channel by clicking the respective channel card in the left column.
+The user can change to a different channel by clicking the respective channel card in the left column.
 
-No special environment variables are necessary; however, running the shell script 'env_variables.sh' will set the FLASK_APP to application.py and turn on debugging.
+## Docker Build and Run
+The application can be run in a docker container.  This is preferred to isolate the program from the target operating environment.
+
+The image should be build using:
+        <code>docker build -t chatterbox .</code>
+Alternatively, the image can be built using the --no-cache option to ensure new requirements are installed:
+        <code>docker build --no-cache -t chatterbox .</code>
+        
+The image is built on a <code>python:3.6-slim-stretch</code> os image.  When the image is built, respective Flask environment variables are set and necessary depedencies are added.  
+
+To run the application from Docker:
+        <code>docker run -d -p 5000:5000 --name chatterbox chatterbox</code>
+
+The application will be available on port 5000:
+        <a href="http://http://127.0.0.1:5000">http://127.0.0.1:5000</a>
+
+To enter the command line for the application <optional>:
+    <code>docker exec -it chatterbox bash</code>
+
+To stop the Docker container and terminate the application:
+    <code>docker kill chatterbox</code>
+    
+To re-run the application, launch without the --name option:
+    <code>docker run -d -p 5000:5000 chatterbox</code>
+    
+To run the application on a different local port (e.g: 8080):
+    <code>docker run -d -p 8080:5000 chatterbox</code>
+
+To remove the container:
+    <code>docker rm chatterbox</code>
+    
+To delete the image:
+    <code>docker rmi chatterbox</code>
 
 
-## Improvements
-Because a database is not being used, the integrity of data depends on Flask remaining up-and-running.  Once Flask stops, the application will not act as intended.  As this was not clarified as a requirement, I made little effort to account for anomalies that happen when Flask restarts (e.g - a user's display could be re-added by someone else, the user's active channel no longer exists, etc.).  
+## Limitations / Future Improvements
+The database is not persistent.  All data is lost when the Flask server is terminated.
 
-The layout is not as responsive to changes in the window size as I would prefer.  I used bootstrap to do much of the design and struggled to get the chat window to resize instead of jumping to a second row of display elements.  As a result, the user needs to use a reasonable window width to see the app reasonably.
+The layout is not mobile-first and not responsive the the full scope of user window adjustments.
 
-I would like to have moved some of the javascript to another file, but the options seemed complex or not universally supported, so I left all the javascript in a single file. (sorry for that. I know it's hard to read in one file.)
+The application is not scaled and relies on a single instance.  
 
-## Personal Touch
+No security is implemented.  
+
+
+## Javascript Animations
 As a personal touch, I added animations:
 - newly added channels slide into place at the top of the channel listing
 - the active channel pulses mildly in the channel listing on the left
